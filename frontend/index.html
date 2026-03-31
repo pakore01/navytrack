@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="US Navy Flight & Carrier Tracker - Real-time military flight and carrier vessel monitoring" />
+  <title>NavyTrack — US Navy Flight & Carrier Monitor</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 3L4 12v17h8v-8h8v8h8V12L16 3z" fill="currentColor" opacity="0.15"/>
+            <path d="M16 3L4 12v17h8v-8h8v8h8V12L16 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="16" cy="13" r="2.5" fill="currentColor"/>
+            <path d="M10 22h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">NavyTrack</span>
+          <span class="brand-sub">US Military Intelligence Monitor</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-label" id="statusLabel">Connecting…</span>
+        <span class="status-time" id="lastUpdate">--:--:-- UTC</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="refreshBtn" title="Refresh data">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 10a6 6 0 1 1 1.5 4M4 14v-4h4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="exportBtn" title="Export CSV">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M10 3v10M6 9l4 4 4-4M4 15h12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="settingsBtn" title="API Settings">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10" cy="10" r="3"/>
+            <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- API KEY MODAL -->
+  <div class="modal-overlay" id="apiModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>API Configuration</h2>
+        <p>Enter your API keys to fetch live data. Keys are stored locally and used only as request headers.</p>
+      </div>
+      <div class="modal-body">
+        <div class="api-source">
+          <div class="api-source-header">
+            <span class="api-badge adsb">ADS-B Exchange</span>
+            <a href="https://www.adsbexchange.com/data/" target="_blank" class="api-link">Get key ↗</a>
+          </div>
+          <p class="api-desc">Primary source for military flights, P-8 Poseidon, E-2 Hawkeye, tankers, AWACS and US Navy aircraft.</p>
+          <input type="password" class="api-input" id="adsbKey" placeholder="ADS-B Exchange API Key" autocomplete="off" />
+        </div>
+        <div class="api-source">
+          <div class="api-source-header">
+            <span class="api-badge openskynet">OpenSky Network</span>
+            <a href="https://opensky-network.org/api/doc" target="_blank" class="api-link">Free account ↗</a>
+          </div>
+          <p class="api-desc">Supplementary ADS-B data. Free tier available. Useful for cross-referencing.</p>
+          <div class="api-row">
+            <input type="text" class="api-input" id="openskyUser" placeholder="Username (optional)" autocomplete="off" />
+            <input type="password" class="api-input" id="openskyPass" placeholder="Password (optional)" autocomplete="off" />
+          </div>
+        </div>
+        <div class="api-source">
+          <div class="api-source-header">
+            <span class="api-badge marine">MarineTraffic</span>
+            <a href="https://www.marinetraffic.com/en/ais-api-services" target="_blank" class="api-link">Get key ↗</a>
+          </div>
+          <p class="api-desc">Carrier vessel positions (USS Gerald R. Ford, USS Dwight D. Eisenhower, etc.) via AIS.</p>
+          <input type="password" class="api-input" id="marineKey" placeholder="MarineTraffic API Key" autocomplete="off" />
+        </div>
+        <div class="api-notice">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 7.5z"/></svg>
+          <span>Military flights may not appear due to classification. Only unclassified ADS-B broadcasts are available. Carrier AIS positions are not always transmitted.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelApiBtn">Cancel</button>
+        <button class="btn-primary" id="saveApiBtn">Save & Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="app-main">
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <span class="stat-value" id="statFlights">—</span>
+        <span class="stat-label">Active Flights</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statCarriers">—</span>
+        <span class="stat-label">Carriers Tracked</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statAircraft">—</span>
+        <span class="stat-label">Aircraft Types</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statRegion">Middle East</span>
+        <span class="stat-label">Focus Region</span>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filters-bar">
+      <div class="filters-left">
+        <div class="filter-group">
+          <label class="filter-label">Type</label>
+          <div class="filter-chips" id="typeFilter">
+            <button class="chip active" data-filter="all">All</button>
+            <button class="chip" data-filter="flight">✈ Flights</button>
+            <button class="chip" data-filter="carrier">⚓ Carriers</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Aircraft</label>
+          <select class="filter-select" id="aircraftFilter">
+            <option value="">All types</option>
+            <option value="P-8">P-8 Poseidon</option>
+            <option value="E-2">E-2 Hawkeye</option>
+            <option value="EA-18">EA-18G Growler</option>
+            <option value="F/A-18">F/A-18</option>
+            <option value="C-130">C-130 Hercules</option>
+            <option value="KC-135">KC-135 Stratotanker</option>
+            <option value="E-6">E-6 Mercury</option>
+            <option value="MH-60">MH-60 Seahawk</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <select class="filter-select" id="statusFilter">
+            <option value="">All</option>
+            <option value="airborne">Airborne</option>
+            <option value="ground">On Ground</option>
+          </select>
+        </div>
+      </div>
+      <div class="filters-right">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="6.5" cy="6.5" r="4.5"/>
+            <path d="M10 10l3 3" stroke-linecap="round"/>
+          </svg>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search callsign, ICAO, vessel…" />
+        </div>
+        <div class="refresh-control">
+          <label class="filter-label">Auto-refresh</label>
+          <select class="filter-select" id="refreshInterval">
+            <option value="0">Off</option>
+            <option value="30" selected>30s</option>
+            <option value="60">1 min</option>
+            <option value="120">2 min</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-container">
+      <div class="table-header-bar">
+        <span class="table-count" id="tableCount">0 results</span>
+        <div class="table-header-actions">
+          <span class="data-source-badge" id="dataSourceBadge">No API configured</span>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th class="sortable" data-col="type">Type <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="callsign">Callsign / Name <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="icao">ICAO / MMSI <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="aircraft">Aircraft / Class <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="origin">Origin <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="destination">Destination <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="altitude">Altitude <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="speed">Speed <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="heading">Heading <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="position">Position <span class="sort-icon">↕</span></th>
+              <th class="sortable" data-col="status">Status <span class="sort-icon">↕</span></th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M32 8L8 24v32h16v-16h16v16h16V24L32 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" opacity="0.4"/>
+            <path d="M24 44h16M32 16v8" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+          </svg>
+        </div>
+        <h3 id="emptyTitle">Configure your API keys to start</h3>
+        <p id="emptyMsg">Click the settings button in the top right to enter your ADS-B Exchange or MarineTraffic API keys and begin tracking.</p>
+        <button class="btn-primary" id="emptyConfigBtn">Configure API Keys</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- DETAIL PANEL (slide-in) -->
+  <div class="detail-overlay" id="detailOverlay"></div>
+  <aside class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <h3 id="detailTitle">—</h3>
+      <button class="btn-icon" id="closeDetail">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l12 12M14 2L2 14" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="detail-body" id="detailBody">
+      <!-- Populated by JS -->
+    </div>
+  </aside>
+
+  <!-- TOAST -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/apikey.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/table.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

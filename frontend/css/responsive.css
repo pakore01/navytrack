@@ -1,0 +1,101 @@
+/* ============================================================
+   RESPONSIVE.CSS — Media queries and mobile behavior
+   ============================================================ */
+
+/* ── TABLET (≤ 1024px) ── */
+@media (max-width: 1024px) {
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .search-input { width: 200px; }
+  .search-input:focus { width: 220px; }
+
+  .detail-panel { width: 360px; }
+}
+
+/* ── MOBILE (≤ 768px) ── */
+@media (max-width: 768px) {
+  :root {
+    --header-h: 56px;
+  }
+
+  .header-inner {
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .brand-sub { display: none; }
+  .status-time { display: none; }
+  .status-label { font-size: 0.72rem; }
+
+  .app-main {
+    padding: 16px 16px 32px;
+    gap: 12px;
+  }
+
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .stat-card { padding: 14px 16px; }
+  .stat-value { font-size: 1.4rem; }
+
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+  .filters-left, .filters-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-chips { flex-wrap: wrap; }
+  .search-input { width: 100%; }
+  .search-input:focus { width: 100%; }
+  .search-wrap { flex: 1; }
+
+  .table-scroll { max-height: calc(100vh - 420px); }
+
+  /* Hide less critical columns on mobile */
+  .data-table th:nth-child(5),
+  .data-table td:nth-child(5),
+  .data-table th:nth-child(6),
+  .data-table td:nth-child(6),
+  .data-table th:nth-child(9),
+  .data-table td:nth-child(9) {
+    display: none;
+  }
+
+  .detail-panel {
+    width: 100%;
+    top: auto;
+    height: 85vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    transform: translateY(100%);
+  }
+  .detail-panel.open { transform: translateY(0); }
+
+  .modal { border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-body { max-height: 55vh; }
+
+  .toast-container {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+  }
+  .toast { max-width: 100%; }
+}
+
+/* ── SMALL MOBILE (≤ 480px) ── */
+@media (max-width: 480px) {
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+
+  .api-row {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions .btn-icon:nth-child(2) { display: none; }
+}

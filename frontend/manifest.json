@@ -1,0 +1,27 @@
+{
+  "name": "NavyTrack — US Navy Flight & Carrier Monitor",
+  "short_name": "NavyTrack",
+  "description": "Real-time US Navy military flight and carrier vessel tracker for Middle East region",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A1628",
+  "theme_color": "#0A1628",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "navigation", "news"],
+  "screenshots": [],
+  "lang": "en"
+}

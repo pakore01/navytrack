@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.so
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node (if tooling added later)
+node_modules/
+npm-debug.log*
+
+# Test / coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# PWA icons (generated locally)
+frontend/icons/
