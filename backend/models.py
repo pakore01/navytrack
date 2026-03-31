@@ -6,17 +6,13 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 
-# ── REQUESTS ──
-
 class FlightRequest(BaseModel):
-    api_key: str                           # ADS-B Exchange API key
+    api_key: Optional[str] = None
 
 
 class CarrierRequest(BaseModel):
-    api_key: str                           # MarineTraffic API key
+    api_key: Optional[str] = None
 
-
-# ── FLIGHT DATA ──
 
 class FlightData(BaseModel):
     icao:         str
@@ -27,12 +23,12 @@ class FlightData(BaseModel):
     destination:  Optional[str]  = None
     lat:          Optional[float]= None
     lon:          Optional[float]= None
-    altitude:     Optional[int]  = None    # feet
-    speed:        Optional[float]= None    # knots
-    heading:      Optional[float]= None    # degrees
+    altitude:     Optional[int]  = None
+    speed:        Optional[float]= None
+    heading:      Optional[float]= None
     on_ground:    bool           = False
     squawk:       Optional[str]  = None
-    source:       str            = "ADS-B Exchange"
+    source:       str            = "airplanes.live"
 
 
 class FlightsResponse(BaseModel):
@@ -40,8 +36,6 @@ class FlightsResponse(BaseModel):
     count:   int
     source:  str
 
-
-# ── VESSEL DATA ──
 
 class VesselData(BaseModel):
     mmsi:        str
@@ -53,8 +47,8 @@ class VesselData(BaseModel):
     last_port:   Optional[str]  = None
     lat:         Optional[float]= None
     lon:         Optional[float]= None
-    speed:       Optional[float]= None    # knots
-    course:      Optional[float]= None    # degrees
+    speed:       Optional[float]= None
+    course:      Optional[float]= None
     timestamp:   Optional[str]  = None
     source:      str            = "MarineTraffic"
 
