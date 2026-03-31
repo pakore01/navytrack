@@ -11,7 +11,7 @@ const CONFIG = {
   // Backend API base URL (FastAPI)
   // In production: change to your deployed URL
   // In local dev:  http://localhost:8000
-  BACKEND_URL: 'http://localhost:8000',
+  BACKEND_URL: 'http://148.230.122.187',
 
   // Auto-refresh default interval (seconds, 0 = off)
   DEFAULT_REFRESH: 30,
