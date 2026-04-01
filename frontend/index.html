@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=2" />
-  <link rel="stylesheet" href="css/layout.css?v=2" />
-  <link rel="stylesheet" href="css/components.css?v=2" />
-  <link rel="stylesheet" href="css/responsive.css?v=2" />
+  <link rel="stylesheet" href="css/base.css?v=3" />
+  <link rel="stylesheet" href="css/layout.css?v=3" />
+  <link rel="stylesheet" href="css/components.css?v=3" />
+  <link rel="stylesheet" href="css/responsive.css?v=3" />
 </head>
 <body>
 
@@ -93,6 +93,17 @@
           </div>
           <p class="api-desc">Carrier vessel positions (USS Gerald R. Ford, USS Dwight D. Eisenhower, etc.) via AIS.</p>
           <input type="password" class="api-input" id="marineKey" placeholder="MarineTraffic API Key" autocomplete="off" />
+        </div>
+        <div class="api-source">
+          <div class="api-source-header">
+            <span class="api-badge" style="background:#FEE2E2;color:#DC2626">🚨 Watchlist</span>
+          </div>
+          <p class="api-desc">Alert when a callsign or ICAO appears in the region. Partial match supported (e.g. "NAVY" matches "NAVY01").</p>
+          <div class="api-row" style="grid-template-columns:1fr auto">
+            <input type="text" class="api-input" id="watchlistInput" placeholder="Callsign or ICAO (e.g. RCH, NAVY, P8)" autocomplete="off" />
+            <button class="btn-primary" id="watchlistAdd" style="white-space:nowrap">+ Add</button>
+          </div>
+          <div id="watchlistItems" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
         </div>
         <div class="api-notice">
           <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0 3.5a.75.75 0 0 1 .75.75v3a.75.75 0 0 1-1.5 0v-3A.75.75 0 0 1 8 7.5z"/></svg>
@@ -247,12 +258,13 @@
   <!-- TOAST -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="js/config.js?v=2"></script>
-  <script src="js/utils.js?v=2"></script>
-  <script src="js/apikey.js?v=2"></script>
-  <script src="js/api.js?v=2"></script>
-  <script src="js/table.js?v=2"></script>
-  <script src="js/filters.js?v=2"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/config.js?v=3"></script>
+  <script src="js/utils.js?v=3"></script>
+  <script src="js/apikey.js?v=3"></script>
+  <script src="js/api.js?v=3"></script>
+  <script src="js/table.js?v=3"></script>
+  <script src="js/filters.js?v=3"></script>
+  <script src="js/alerts.js?v=3"></script>
+  <script src="js/app.js?v=3"></script>
 </body>
 </html>
