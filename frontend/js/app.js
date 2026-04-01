@@ -95,7 +95,7 @@ const App = (() => {
     document.getElementById('lastUpdate').textContent = Utils.formatTimeShort();
 
     // If keys already saved → fetch immediately
-    if (ApiKey.hasAnyKey()) {
+    if (true) {
       await Api.fetchAll();
       const interval = parseInt(Utils.lsGet(CONFIG.STORAGE_KEYS.REFRESH_INT) || '30');
       startRefresh(interval);

@@ -535,3 +535,76 @@
 #refreshBtn.loading svg {
   animation: spin 0.8s linear infinite;
 }
+
+/* ── NAVY BADGE ── */
+.navy-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: #001f5b;
+  color: #7EB3FF;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ── DETAIL PHOTO ── */
+.detail-photo-wrap {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface-2);
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.detail-photo {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  background: #0a0a0a;
+  display: block;
+}
+.detail-photo-loading,
+.detail-photo-none {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  padding: 16px;
+}
+.detail-photo-credit {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  padding: 6px 10px;
+  background: var(--color-surface-2);
+  width: 100%;
+  text-align: right;
+}
+
+/* ── NAVY BANNER ── */
+.detail-navy-banner {
+  background: linear-gradient(135deg, #001f5b, #003399);
+  color: #7EB3FF;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ── DETAIL MAP ── */
+.detail-map-wrap {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+.detail-map {
+  width: 100%;
+  height: 220px;
+  border: none;
+  display: block;
+}

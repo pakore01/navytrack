@@ -1,5 +1,6 @@
 /* ============================================================
    TABLE.JS — Table rendering, sorting, row detail panel
+   All enhancements: photo, map, flag, Navy detection, history
    ============================================================ */
 
 'use strict';
@@ -8,6 +9,85 @@ const Table = (() => {
 
   let sortCol = 'callsign';
   let sortDir = 'asc';
+  let knownICAOs = new Set();
+  let history = JSON.parse(localStorage.getItem('navytrack_history') || '[]');
+
+  // ── COUNTRY FLAG FROM ICAO PREFIX ──
+  function getFlag(icao = '', registration = '') {
+    const hex = icao.toUpperCase();
+    const reg = registration.toUpperCase();
+    if (hex.startsWith('AE') || hex.startsWith('ADF') || reg.startsWith('16') || reg.startsWith('16+')) return '🇺🇸';
+    if (hex.startsWith('3F') || reg.startsWith('15+') || reg.startsWith('16+')) return '🇩🇪';
+    if (hex.startsWith('43')) return '🇫🇷';
+    if (hex.startsWith('40')) return '🇬🇧';
+    if (hex.startsWith('48')) return '🇮🇹';
+    if (hex.startsWith('34')) return '🇪🇸';
+    if (hex.startsWith('38')) return '🇳🇱';
+    if (hex.startsWith('71')) return '🇹🇷';
+    if (hex.startsWith('74')) return '🇸🇦';
+    if (hex.startsWith('70')) return '🇮🇱';
+    if (hex.startsWith('89')) return '🇯🇵';
+    if (hex.startsWith('78')) return '🇦🇪';
+    return '🌍';
+  }
+
+  // ── DETECT US NAVY ──
+  function isUSNavy(row) {
+    const hex = (row.icao || '').toUpperCase();
+    const call = (row.callsign || '').toUpperCase();
+    const reg = (row.registration || '').toUpperCase();
+    return hex.startsWith('AE') || hex.startsWith('ADF') ||
+           call.startsWith('NAVY') || call.startsWith('RCH') ||
+           call.startsWith('CNV') || call.startsWith('VXS') ||
+           reg.startsWith('16') || reg.startsWith('16+');
+  }
+
+  // ── FETCH AIRCRAFT PHOTO FROM PLANESPOTTERS ──
+  async function fetchPhoto(icao) {
+    if (!icao || icao === '—') return null;
+    try {
+      const res = await fetch(`https://api.planespotters.net/pub/photos/hex/${icao}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      const photo = data.photos?.[0];
+      if (!photo) return null;
+      return {
+        url:         photo.thumbnail_large?.src || photo.thumbnail?.src,
+        photographer: photo.photographer || '',
+        link:        photo.link || '',
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  // ── SAVE TO HISTORY ──
+  function saveToHistory(row) {
+    const entry = {
+      icao:     row.icao,
+      callsign: row.callsign,
+      aircraft: row.aircraft,
+      lat:      row.lat,
+      lon:      row.lon,
+      seen:     Date.now(),
+    };
+    history.unshift(entry);
+    if (history.length > 200) history = history.slice(0, 200);
+    try { localStorage.setItem('navytrack_history', JSON.stringify(history)); } catch {}
+  }
+
+  // ── NOTIFY NEW AIRCRAFT ──
+  function notifyNew(row) {
+    const flag = getFlag(row.icao, row.registration);
+    const navy = isUSNavy(row) ? ' 🇺🇸 US NAVY' : '';
+    Utils.toast(`${flag}${navy} New: ${row.callsign || row.icao} — ${row.aircraft || 'Military'}`, 'info', 5000);
+    try {
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAA' +
+        'EAAQAAgD4AAACAACABAABEAAAAQABAAQAAAA');
+      audio.volume = 0.2;
+      audio.play().catch(() => {});
+    } catch {}
+  }
 
   // ── RENDER TABLE ──
   function render(data = []) {
@@ -31,8 +111,18 @@ const Table = (() => {
       tr.dataset.idx = idx;
 
       const isCarrier   = row.type === 'carrier';
+      const navy        = isUSNavy(row);
       const statusClass = isCarrier ? 'at-sea' : (row.on_ground ? 'ground' : 'airborne');
-      const statusLabel = isCarrier ? 'At Sea'  : (row.on_ground ? 'On Ground' : 'Airborne');
+      const statusLabel = isCarrier ? 'At Sea' : (row.on_ground ? 'On Ground' : 'Airborne');
+      const flag        = getFlag(row.icao, row.registration || '');
+      const navyBadge   = navy ? '<span class="navy-badge">US NAVY</span>' : '';
+
+      // Detect new aircraft
+      if (!knownICAOs.has(row.icao) && knownICAOs.size > 0) {
+        notifyNew(row);
+        saveToHistory(row);
+      }
+      knownICAOs.add(row.icao);
 
       tr.innerHTML = `
         <td>
@@ -40,14 +130,27 @@ const Table = (() => {
             ${row.type === 'carrier' ? '⚓' : '✈'} ${row.type === 'carrier' ? 'Carrier' : 'Flight'}
           </span>
         </td>
-        <td class="cell-callsign">${escHtml(row.callsign)}</td>
+        <td class="cell-callsign">
+          ${flag} ${escHtml(row.callsign || '—')}
+          ${navyBadge}
+        </td>
         <td class="cell-mono cell-muted">${escHtml(row.icao)}</td>
         <td>${escHtml(row.aircraft || '—')}</td>
         <td class="cell-muted">${escHtml(row.origin || '—')}</td>
         <td class="cell-muted">${escHtml(row.destination || '—')}</td>
         <td class="cell-mono">${isCarrier ? '—' : Utils.formatAlt(row.altitude)}</td>
         <td class="cell-mono">${Utils.formatSpeed(row.speed)}</td>
-        <td class="cell-mono">${Utils.formatHeading(row.heading)}</td>
+        <td>
+          <span class="heading-arrow">
+            <span class="heading-dial">
+              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(${row.heading != null ? row.heading : 0}deg)">
+                <path d="M10 2L13 14H10V18H10L7 14H10V2Z" fill="#0057FF" opacity="0.9"/>
+                <circle cx="10" cy="10" r="9" stroke="#E2E5EA" stroke-width="1" fill="none"/>
+              </svg>
+            </span>
+            <span class="cell-mono">${row.heading != null ? Math.round(row.heading) + '°' : '—'}</span>
+          </span>
+        </td>
         <td class="cell-mono">${Utils.formatCoords(row.lat, row.lon)}</td>
         <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
         <td class="cell-muted">${Utils.timeAgo(row.last_seen)}</td>
@@ -82,37 +185,41 @@ const Table = (() => {
           sortCol = col;
           sortDir = 'asc';
         }
-
         STATE.sort.col = sortCol;
         STATE.sort.dir = sortDir;
-
-        // Update header classes
         document.querySelectorAll('.data-table th.sortable').forEach(h => {
           h.classList.remove('sorted');
           h.querySelector('.sort-icon').textContent = '↕';
         });
         th.classList.add('sorted');
         th.querySelector('.sort-icon').textContent = sortDir === 'asc' ? '↑' : '↓';
-
         Filters.apply();
       });
     });
   }
 
   // ── OPEN DETAIL PANEL ──
-  function openDetail(row) {
+  async function openDetail(row) {
     const panel   = document.getElementById('detailPanel');
     const overlay = document.getElementById('detailOverlay');
     const title   = document.getElementById('detailTitle');
     const body    = document.getElementById('detailBody');
-
     if (!panel || !body) return;
 
-    title.textContent = row.callsign || row.icao || '—';
-
     const isCarrier = row.type === 'carrier';
+    const navy      = isUSNavy(row);
+    const flag      = getFlag(row.icao, row.registration || '');
 
+    title.textContent = `${flag} ${row.callsign || row.icao || '—'}`;
+
+    // Show panel immediately with loading photo
     body.innerHTML = `
+      <div class="detail-photo-wrap" id="photoWrap">
+        <div class="detail-photo-loading">Loading photo…</div>
+      </div>
+
+      ${navy ? '<div class="detail-navy-banner">🇺🇸 US Navy Aircraft</div>' : ''}
+
       <div class="detail-section">
         <div class="detail-section-title">Identification</div>
         ${detailRow('Type',         isCarrier ? '⚓ Carrier' : '✈ Military Flight')}
@@ -120,42 +227,68 @@ const Table = (() => {
         ${detailRow(isCarrier ? 'MMSI' : 'ICAO Hex', row.icao)}
         ${detailRow(isCarrier ? 'Hull Number' : 'Registration', row.registration || '—')}
         ${detailRow(isCarrier ? 'Vessel Class' : 'Aircraft Type', row.aircraft || '—')}
+        ${detailRow('Country',      flag + ' ' + (row.origin || '—'))}
         ${detailRow('Data Source',  row.source || '—')}
       </div>
 
       <div class="detail-section">
         <div class="detail-section-title">Navigation</div>
-        ${detailRow('Latitude',     row.lat  != null ? row.lat.toFixed(5) + '° N/S' : '—')}
-        ${detailRow('Longitude',    row.lon  != null ? row.lon.toFixed(5) + '° E/W' : '—')}
         ${detailRow('Coordinates',  Utils.formatCoords(row.lat, row.lon))}
         ${!isCarrier ? detailRow('Altitude', Utils.formatAlt(row.altitude)) : ''}
         ${detailRow('Speed',        Utils.formatSpeed(row.speed))}
         ${detailRow('Heading',      Utils.formatHeading(row.heading))}
         ${detailRow('Status',       isCarrier ? 'At Sea' : (row.on_ground ? 'On Ground' : 'Airborne'))}
+        ${detailRow('Squawk',       row.squawk || '—')}
       </div>
 
       <div class="detail-section">
         <div class="detail-section-title">Route</div>
-        ${detailRow('Origin',       row.origin      || '—', true)}
-        ${detailRow('Destination',  row.destination || '—', true)}
-        ${!isCarrier ? detailRow('Squawk', row.squawk || '—') : ''}
-      </div>
-
-      <div class="detail-section">
-        <div class="detail-section-title">Tracking</div>
-        ${detailRow('Last Update',  row.last_seen ? new Date(row.last_seen).toUTCString() : '—', true)}
+        ${detailRow('Origin',      row.origin      || '—', true)}
+        ${detailRow('Destination', row.destination || '—', true)}
+        ${detailRow('Last Update', row.last_seen ? new Date(row.last_seen).toUTCString() : '—', true)}
       </div>
 
       ${row.lat && row.lon ? `
-      <a class="btn-primary" 
-         href="https://www.openstreetmap.org/?mlat=${row.lat}&mlon=${row.lon}&zoom=6"
-         target="_blank" rel="noopener" style="justify-content:center">
-        View on Map ↗
-      </a>` : ''}
+      <div class="detail-section">
+        <div class="detail-section-title">Live Position</div>
+        <div class="detail-map-wrap">
+          <iframe
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${row.lon - 3}%2C${row.lat - 3}%2C${row.lon + 3}%2C${row.lat + 3}&layer=mapnik&marker=${row.lat}%2C${row.lon}"
+            class="detail-map"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <a class="btn-secondary" style="margin-top:8px;justify-content:center;display:flex"
+           href="https://www.openstreetmap.org/?mlat=${row.lat}&mlon=${row.lon}&zoom=7"
+           target="_blank" rel="noopener">
+          Open full map ↗
+        </a>
+      </div>` : ''}
     `;
 
     panel.classList.add('open');
     overlay.classList.add('visible');
+
+    // Load photo async
+    if (!isCarrier) {
+      const photo = await fetchPhoto(row.icao);
+      const wrap  = document.getElementById('photoWrap');
+      if (wrap) {
+        if (photo?.url) {
+          wrap.innerHTML = `
+            <a href="${photo.link}" target="_blank" rel="noopener">
+              <img src="${photo.url}" class="detail-photo" alt="${row.aircraft || row.icao}" loading="lazy"/>
+            </a>
+            <div class="detail-photo-credit">📷 ${escHtml(photo.photographer)}</div>
+          `;
+        } else {
+          wrap.innerHTML = `<div class="detail-photo-none">No photo available</div>`;
+        }
+      }
+    } else {
+      const wrap = document.getElementById('photoWrap');
+      if (wrap) wrap.innerHTML = '';
+    }
   }
 
   // ── CLOSE DETAIL PANEL ──
@@ -181,7 +314,6 @@ const Table = (() => {
   // ── INIT ──
   function init() {
     bindSort();
-
     document.getElementById('closeDetail')?.addEventListener('click', closeDetail);
     document.getElementById('detailOverlay')?.addEventListener('click', closeDetail);
   }

@@ -2,7 +2,7 @@
    SW.JS — Service Worker for PWA (NavyTrack)
    ============================================================ */
 
-const CACHE_NAME  = 'navytrack-v1';
+const CACHE_NAME  = 'navytrack-v2';
 const CACHE_URLS  = [
   './',
   './index.html',
