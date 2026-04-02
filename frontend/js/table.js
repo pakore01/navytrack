@@ -9,6 +9,7 @@ const Table = (() => {
   let sortCol = 'callsign';
   let sortDir = 'asc';
   let knownICAOs = new Set();
+  const detectionTimes = new Map();
   let history = [];
   try { history = JSON.parse(localStorage.getItem('navytrack_history') || '[]'); } catch {}
 
@@ -40,6 +41,18 @@ const Table = (() => {
     if (a.includes('DORNIER') || a.includes('BEECH') || a.includes('CESSNA') ||
         a.includes('KING AIR')) return '✈';
     return '✈';
+  }
+
+  function timeInZone(icao) {
+    const start = detectionTimes.get(icao);
+    if (!start) return 'new';
+    const diff = Math.floor((Date.now() - start) / 1000);
+    if (diff < 60)   return diff + 's';
+    if (diff === 0)   return '<1s';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ' + (diff % 60) + 's';
+    const h = Math.floor(diff / 3600);
+    const m = Math.floor((diff % 3600) / 60);
+    return h + 'h ' + m + 'm';
   }
 
   function getFlag(icao, registration) {
@@ -134,7 +147,11 @@ const Table = (() => {
         saveToHistory(row);
       }
       History.add(row);
+      if (!detectionTimes.has(row.icao)) {
+        detectionTimes.set(row.icao, Date.now());
+      }
       knownICAOs.add(row.icao);
+      const inZone = timeInZone(row.icao);
 
       const heading = row.heading != null ? Math.round(row.heading) : null;
       const headingCell = heading != null
@@ -153,7 +170,8 @@ const Table = (() => {
         '<td>' + headingCell + '</td>' +
         '<td class="cell-mono">' + Utils.formatCoords(row.lat, row.lon) + '</td>' +
         '<td><span class="status-badge ' + statusClass + '">' + statusLabel + '</span></td>' +
-        '<td class="cell-muted">' + Utils.timeAgo(row.last_seen) + '</td>';
+        '<td class="cell-muted">' + Utils.timeAgo(row.last_seen) + '</td>' +
+        '<td class="cell-mono" style="color:var(--color-accent);font-size:0.72rem">' + inZone + '</td>';
 
       tr.addEventListener('click', function() { openDetail(row); });
       fragment.appendChild(tr);

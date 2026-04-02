@@ -11,6 +11,7 @@ import uvicorn
 from routes.flights  import router as flights_router
 from routes.vessels  import router as vessels_router
 from routes.watchlist import router as watchlist_router
+from routes.regions  import router as regions_router
 
 app = FastAPI(
     title="NavyTrack API",
@@ -32,6 +33,7 @@ app.add_middleware(
 app.include_router(flights_router, prefix="/api")
 app.include_router(vessels_router, prefix="/api")
 app.include_router(watchlist_router, prefix="/api")
+app.include_router(regions_router,  prefix="/api")
 
 
 @app.get("/")
