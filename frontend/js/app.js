@@ -86,6 +86,7 @@ const App = (() => {
     // Initialize modules
     ApiKey.init();
     Alerts.init();
+    Regions.init();
     Table.init();
     Filters.init();
     bindEvents();

@@ -637,3 +637,34 @@
   font-size: 0.78rem;
   color: var(--color-text-muted);
 }
+
+/* ── REGIONS GRID ── */
+.regions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+.region-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  transition: all var(--transition-fast);
+}
+.region-check:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+}
+.region-check input {
+  accent-color: var(--color-accent);
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}

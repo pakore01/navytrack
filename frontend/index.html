@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=3" />
-  <link rel="stylesheet" href="css/layout.css?v=3" />
-  <link rel="stylesheet" href="css/components.css?v=3" />
-  <link rel="stylesheet" href="css/responsive.css?v=3" />
+  <link rel="stylesheet" href="css/base.css?v=5" />
+  <link rel="stylesheet" href="css/layout.css?v=5" />
+  <link rel="stylesheet" href="css/components.css?v=5" />
+  <link rel="stylesheet" href="css/responsive.css?v=5" />
 </head>
 <body>
 
@@ -93,6 +93,21 @@
           </div>
           <p class="api-desc">Carrier vessel positions (USS Gerald R. Ford, USS Dwight D. Eisenhower, etc.) via AIS.</p>
           <input type="password" class="api-input" id="marineKey" placeholder="MarineTraffic API Key" autocomplete="off" />
+        </div>
+        <div class="api-source">
+          <div class="api-source-header">
+            <span class="api-badge" style="background:#EBF1FF;color:#0057FF">🌍 Monitor Regions</span>
+          </div>
+          <p class="api-desc">Select which regions the Telegram bot monitors. Changes apply immediately.</p>
+          <div class="regions-grid" id="regionsGrid">
+            <label class="region-check"><input type="checkbox" value="middle_east" checked> 🕌 Middle East</label>
+            <label class="region-check"><input type="checkbox" value="europe"> 🇪🇺 Europe</label>
+            <label class="region-check"><input type="checkbox" value="north_america"> 🌎 North America</label>
+            <label class="region-check"><input type="checkbox" value="south_america"> 🌎 South America</label>
+            <label class="region-check"><input type="checkbox" value="asia_pacific"> 🌏 Asia Pacific</label>
+            <label class="region-check"><input type="checkbox" value="africa"> 🌍 Africa</label>
+            <label class="region-check"><input type="checkbox" value="arctic"> 🧊 Arctic</label>
+          </div>
         </div>
         <div class="api-source">
           <div class="api-source-header">
@@ -258,13 +273,14 @@
   <!-- TOAST -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="js/config.js?v=3"></script>
-  <script src="js/utils.js?v=3"></script>
-  <script src="js/apikey.js?v=3"></script>
-  <script src="js/api.js?v=3"></script>
-  <script src="js/table.js?v=3"></script>
-  <script src="js/filters.js?v=3"></script>
-  <script src="js/alerts.js?v=3"></script>
-  <script src="js/app.js?v=3"></script>
+  <script src="js/config.js?v=5"></script>
+  <script src="js/utils.js?v=5"></script>
+  <script src="js/apikey.js?v=5"></script>
+  <script src="js/api.js?v=5"></script>
+  <script src="js/table.js?v=5"></script>
+  <script src="js/filters.js?v=5"></script>
+  <script src="js/alerts.js?v=5"></script>
+  <script src="js/regions.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
 </body>
 </html>
