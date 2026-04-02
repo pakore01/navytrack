@@ -1,40 +1,51 @@
 /* ============================================================
-   BASE.CSS — Variables, Typography, Reset, Themes
-   NavyTrack — US Navy Flight & Carrier Monitor
+   BASE.CSS — Dark tactical military theme
+   NavyTrack
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
 
-/* ── DESIGN TOKENS ── */
 :root {
-  /* Colors */
-  --color-bg:          #F4F5F7;
-  --color-surface:     #FFFFFF;
-  --color-surface-2:   #F8F9FB;
-  --color-border:      #E2E5EA;
-  --color-border-subtle: #ECEEF2;
+  /* Core dark palette */
+  --color-bg:            #080C14;
+  --color-surface:       #0D1421;
+  --color-surface-2:     #111827;
+  --color-surface-3:     #1A2235;
+  --color-border:        rgba(255,255,255,0.07);
+  --color-border-subtle: rgba(255,255,255,0.04);
+  --color-border-accent: rgba(0,212,120,0.2);
 
-  --color-text-primary:   #0D1117;
-  --color-text-secondary: #5A6272;
-  --color-text-muted:     #9CA3B0;
+  /* Text */
+  --color-text-primary:   #E8EDF5;
+  --color-text-secondary: #7A8BA8;
+  --color-text-muted:     #3D5068;
 
-  --color-accent:       #0057FF;
-  --color-accent-hover: #0046D4;
-  --color-accent-light: #EBF1FF;
+  /* Accent — radar green */
+  --color-accent:       #00D478;
+  --color-accent-hover: #00B866;
+  --color-accent-light: rgba(0,212,120,0.1);
+  --color-accent-glow:  rgba(0,212,120,0.3);
 
+  /* Blue radar */
+  --color-blue:         #3B82F6;
+  --color-blue-light:   rgba(59,130,246,0.1);
+  --color-blue-glow:    rgba(59,130,246,0.3);
+
+  /* Navy */
   --color-navy:         #0A1628;
-  --color-navy-mid:     #152344;
+  --color-navy-mid:     #0F1F3D;
 
-  --color-success:      #0D9E5B;
-  --color-success-bg:   #E8F9F1;
-  --color-warning:      #D97706;
-  --color-warning-bg:   #FEF3E2;
-  --color-danger:       #DC2626;
-  --color-danger-bg:    #FEE2E2;
+  /* Status */
+  --color-success:      #00D478;
+  --color-success-bg:   rgba(0,212,120,0.08);
+  --color-warning:      #F59E0B;
+  --color-warning-bg:   rgba(245,158,11,0.08);
+  --color-danger:       #EF4444;
+  --color-danger-bg:    rgba(239,68,68,0.08);
 
-  --color-adsb:         #0057FF;
-  --color-opensky:      #059669;
-  --color-marine:       #7C3AED;
+  /* Type colors */
+  --color-adsb:         #3B82F6;
+  --color-marine:       #8B5CF6;
 
   /* Typography */
   --font-display: 'Syne', sans-serif;
@@ -43,24 +54,23 @@
 
   /* Sizing */
   --header-h:     64px;
-  --radius-sm:    6px;
-  --radius-md:    10px;
-  --radius-lg:    16px;
-  --radius-xl:    20px;
+  --radius-sm:    4px;
+  --radius-md:    8px;
+  --radius-lg:    12px;
+  --radius-xl:    16px;
 
   /* Shadows */
-  --shadow-sm:    0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:    0 4px 12px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
-  --shadow-lg:    0 12px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-panel: -8px 0 32px rgba(0,0,0,0.10);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:    0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:    0 12px 40px rgba(0,0,0,0.6);
+  --shadow-panel: -4px 0 32px rgba(0,0,0,0.6);
+  --shadow-glow:  0 0 20px rgba(0,212,120,0.15);
 
-  /* Transitions */
   --transition-fast: 150ms ease;
   --transition-mid:  250ms ease;
   --transition-slow: 400ms ease;
 }
 
-/* ── RESET ── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -68,10 +78,9 @@
 }
 
 html {
-  font-size: 15px;
+  font-size: 14px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -80,9 +89,11 @@ body {
   color: var(--color-text-primary);
   line-height: 1.5;
   min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(0,212,120,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(59,130,246,0.03) 0%, transparent 50%);
 }
 
-/* ── TYPOGRAPHY ── */
 h1, h2, h3, h4, h5 {
   font-family: var(--font-display);
   font-weight: 700;
@@ -96,22 +107,14 @@ a {
 }
 a:hover { opacity: 0.75; }
 
-input, select, button {
-  font-family: var(--font-body);
-  font-size: inherit;
-}
+input, select, button { font-family: var(--font-body); font-size: inherit; }
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--color-surface-3); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* ── UTILITY ── */
 .sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
 }
