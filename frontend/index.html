@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=1775158677" />
-  <link rel="stylesheet" href="css/layout.css?v=1775158677" />
-  <link rel="stylesheet" href="css/components.css?v=1775158677" />
-  <link rel="stylesheet" href="css/responsive.css?v=1775158677" />
+  <link rel="stylesheet" href="css/base.css?v=1775159867" />
+  <link rel="stylesheet" href="css/layout.css?v=1775159867" />
+  <link rel="stylesheet" href="css/components.css?v=1775159867" />
+  <link rel="stylesheet" href="css/responsive.css?v=1775159867" />
 </head>
 <body>
 
@@ -59,6 +59,13 @@
         <button class="btn-icon" id="statsBtn" title="Statistics">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M3 14h3V8H3v6zM8 14h3V4H8v10zM13 14h3v-4h-3v4z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="alertsHistoryBtn" title="Alerts History">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2z"/>
+            <path d="M10 6v4l3 2" stroke-linecap="round"/>
+            <path d="M3 3l14 14" stroke-linecap="round" stroke-width="1.2"/>
           </svg>
         </button>
         <button class="btn-icon" id="historyBtn" title="Flight History">
@@ -333,6 +340,22 @@
     </div>
   </div>
 
+  <!-- ALERTS HISTORY PANEL -->
+  <div class="modal-overlay" id="alertsHistoryModal">
+    <div class="modal" style="max-width:750px">
+      <div class="modal-header">
+        <h2>Alerts History</h2>
+        <p>All alerts sent by the Telegram bot</p>
+      </div>
+      <div class="modal-body" id="alertsHistoryBody" style="max-height:70vh">
+        <div class="history-empty">Loading...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="closeAlertsHistoryBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- HISTORY PANEL -->
   <div class="modal-overlay" id="historyModal">
     <div class="modal" style="max-width:700px">
@@ -370,17 +393,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/theme.js"></script>
-  <script src="js/config.js?v=1775158677"></script>
-  <script src="js/utils.js?v=1775158677"></script>
-  <script src="js/apikey.js?v=1775158677"></script>
-  <script src="js/api.js?v=1775158677"></script>
-  <script src="js/table.js?v=1775158677"></script>
-  <script src="js/filters.js?v=1775158677"></script>
-  <script src="js/alerts.js?v=1775158677"></script>
-  <script src="js/regions.js?v=1775158677"></script>
+  <script src="js/config.js?v=1775159867"></script>
+  <script src="js/utils.js?v=1775159867"></script>
+  <script src="js/apikey.js?v=1775159867"></script>
+  <script src="js/api.js?v=1775159867"></script>
+  <script src="js/table.js?v=1775159867"></script>
+  <script src="js/filters.js?v=1775159867"></script>
+  <script src="js/alerts.js?v=1775159867"></script>
+  <script src="js/regions.js?v=1775159867"></script>
   <script src="js/zones.js"></script>
-  <script src="js/history.js?v=1775158677"></script>
-  <script src="js/stats.js?v=1775158677"></script>
-  <script src="js/app.js?v=1775158677"></script>
+  <script src="js/alerts_history.js"></script>
+  <script src="js/history.js?v=1775159867"></script>
+  <script src="js/stats.js?v=1775159867"></script>
+  <script src="js/app.js?v=1775159867"></script>
 </body>
 </html>

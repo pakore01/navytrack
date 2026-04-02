@@ -90,6 +90,7 @@ const App = (() => {
     Regions.init();
     History.init();
     Stats.init();
+    AlertsHistory.init();
     Zones.init();
     Table.init();
     Filters.init();
