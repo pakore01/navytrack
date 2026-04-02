@@ -12,6 +12,36 @@ const Table = (() => {
   let history = [];
   try { history = JSON.parse(localStorage.getItem('navytrack_history') || '[]'); } catch {}
 
+  // ── AIRCRAFT TYPE ICON ──
+  function getAircraftIcon(aircraft) {
+    if (!aircraft) return '✈';
+    const a = aircraft.toUpperCase();
+    if (a.includes('HELICOPTER') || a.includes('SEAHAWK') || a.includes('BLACK HAWK') ||
+        a.includes('CHINOOK') || a.includes('APACHE') || a.includes('MH-60') ||
+        a.includes('UH-60') || a.includes('CH-47') || a.includes('AW-') ||
+        a.includes('AGUSTA') || a.includes('SIKORSKY') || a.includes('EC-135')) return '🚁';
+    if (a.includes('PREDATOR') || a.includes('REAPER') || a.includes('GLOBAL HAWK') ||
+        a.includes('UAV') || a.includes('DRONE')) return '🛸';
+    if (a.includes('TANKER') || a.includes('KC-135') || a.includes('KC-10') ||
+        a.includes('STRATOTANKER')) return '⛽';
+    if (a.includes('C-130') || a.includes('C-17') || a.includes('C-5') ||
+        a.includes('HERCULES') || a.includes('GLOBEMASTER') || a.includes('GALAXY') ||
+        a.includes('TRANSPORT') || a.includes('C-2') || a.includes('C-40')) return '📦';
+    if (a.includes('P-8') || a.includes('POSEIDON') || a.includes('ORION') ||
+        a.includes('MARITIME') || a.includes('PATROL')) return '🔍';
+    if (a.includes('E-2') || a.includes('HAWKEYE') || a.includes('AWACS') ||
+        a.includes('SENTRY') || a.includes('E-3') || a.includes('AEW')) return '📡';
+    if (a.includes('EA-18') || a.includes('GROWLER') || a.includes('ELECTRONIC')) return '⚡';
+    if (a.includes('F-16') || a.includes('F-18') || a.includes('F-35') ||
+        a.includes('F-15') || a.includes('HORNET') || a.includes('FALCON') ||
+        a.includes('FIGHTER') || a.includes('STRIKE')) return '🚀';
+    if (a.includes('E-6') || a.includes('MERCURY') || a.includes('COMMAND')) return '📻';
+    if (a.includes('OSPREY') || a.includes('V-22')) return '🔄';
+    if (a.includes('DORNIER') || a.includes('BEECH') || a.includes('CESSNA') ||
+        a.includes('KING AIR')) return '✈';
+    return '✈';
+  }
+
   function getFlag(icao, registration) {
     const hex = (icao || '').toUpperCase();
     const reg = (registration || '').toUpperCase();
@@ -103,6 +133,7 @@ const Table = (() => {
         if (newCount < 3) { notifyNew(row); newCount++; }
         saveToHistory(row);
       }
+      History.add(row);
       knownICAOs.add(row.icao);
 
       const heading = row.heading != null ? Math.round(row.heading) : null;
@@ -114,7 +145,7 @@ const Table = (() => {
         '<td><span class="type-badge ' + row.type + '">' + (row.type === 'carrier' ? '⚓ Carrier' : '✈ Flight') + '</span></td>' +
         '<td class="cell-callsign">' + flag + ' ' + escHtml(row.callsign || '—') + navyBadge + '</td>' +
         '<td class="cell-mono cell-muted">' + escHtml(row.icao) + '</td>' +
-        '<td>' + escHtml(row.aircraft || '—') + '</td>' +
+        '<td>' + getAircraftIcon(row.aircraft) + ' ' + escHtml(row.aircraft || '—') + '</td>' +
         '<td class="cell-muted">' + escHtml(row.origin || '—') + '</td>' +
         '<td class="cell-muted">' + escHtml(row.destination || '—') + '</td>' +
         '<td class="cell-mono">' + (isCarrier ? '—' : Utils.formatAlt(row.altitude)) + '</td>' +

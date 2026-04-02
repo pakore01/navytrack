@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=9" />
-  <link rel="stylesheet" href="css/layout.css?v=9" />
-  <link rel="stylesheet" href="css/components.css?v=9" />
-  <link rel="stylesheet" href="css/responsive.css?v=9" />
+  <link rel="stylesheet" href="css/base.css?v=1775135701" />
+  <link rel="stylesheet" href="css/layout.css?v=1775135701" />
+  <link rel="stylesheet" href="css/components.css?v=1775135701" />
+  <link rel="stylesheet" href="css/responsive.css?v=1775135701" />
 </head>
 <body>
 
@@ -47,6 +47,17 @@
         <button class="btn-icon" id="exportBtn" title="Export CSV">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M10 3v10M6 9l4 4 4-4M4 15h12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="statsBtn" title="Statistics">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 14h3V8H3v6zM8 14h3V4H8v10zM13 14h3v-4h-3v4z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="historyBtn" title="Flight History">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10" cy="10" r="8"/>
+            <path d="M10 6v4l3 2" stroke-linecap="round"/>
           </svg>
         </button>
         <button class="btn-icon" id="settingsBtn" title="API Settings">
@@ -150,8 +161,8 @@
         <span class="stat-label">Aircraft Types</span>
       </div>
       <div class="stat-card">
-        <span class="stat-value" id="statRegion">Middle East</span>
-        <span class="stat-label">Focus Region</span>
+        <span class="stat-value" id="statRegion" style="font-size:1rem">—</span>
+        <span class="stat-label">Active Regions</span>
       </div>
     </div>
 
@@ -256,6 +267,39 @@
 
   </main>
 
+
+  <!-- STATS PANEL -->
+  <div class="modal-overlay" id="statsModal">
+    <div class="modal" style="max-width:700px">
+      <div class="modal-header">
+        <h2>Statistics</h2>
+        <p>Real-time breakdown of detected military aircraft</p>
+      </div>
+      <div class="modal-body" id="statsBody" style="max-height:70vh">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="closeStatsBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PANEL -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal" style="max-width:700px">
+      <div class="modal-header">
+        <h2>Flight History</h2>
+        <p>All military aircraft detected this session</p>
+      </div>
+      <div class="modal-body" id="historyBody" style="max-height:70vh">
+        <div class="history-empty">No aircraft detected yet</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="clearHistoryBtn">Clear History</button>
+        <button class="btn-primary" id="closeHistoryBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- DETAIL PANEL (slide-in) -->
   <div class="detail-overlay" id="detailOverlay"></div>
   <aside class="detail-panel" id="detailPanel">
@@ -273,14 +317,16 @@
   <!-- TOAST -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="js/config.js?v=9"></script>
-  <script src="js/utils.js?v=9"></script>
-  <script src="js/apikey.js?v=9"></script>
-  <script src="js/api.js?v=9"></script>
-  <script src="js/table.js?v=9"></script>
-  <script src="js/filters.js?v=9"></script>
-  <script src="js/alerts.js?v=9"></script>
-  <script src="js/regions.js?v=9"></script>
-  <script src="js/app.js?v=9"></script>
+  <script src="js/config.js?v=1775135701"></script>
+  <script src="js/utils.js?v=1775135701"></script>
+  <script src="js/apikey.js?v=1775135701"></script>
+  <script src="js/api.js?v=1775135701"></script>
+  <script src="js/table.js?v=1775135701"></script>
+  <script src="js/filters.js?v=1775135701"></script>
+  <script src="js/alerts.js?v=1775135701"></script>
+  <script src="js/regions.js?v=1775135701"></script>
+  <script src="js/history.js?v=1775135701"></script>
+  <script src="js/stats.js?v=1775135701"></script>
+  <script src="js/app.js?v=1775135701"></script>
 </body>
 </html>

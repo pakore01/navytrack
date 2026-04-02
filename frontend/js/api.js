@@ -149,6 +149,18 @@ const Api = (() => {
     document.getElementById('statFlights').textContent  = STATE.raw.flights.length  || '0';
     document.getElementById('statCarriers').textContent = STATE.raw.carriers.length || '0';
     document.getElementById('statAircraft').textContent = types.size || '0';
+    // Update active regions
+    const regionNames = {
+      middle_east: 'Mid East', europe: 'Europe', north_america: 'N. America',
+      south_america: 'S. America', asia_pacific: 'Asia Pac', africa: 'Africa', arctic: 'Arctic'
+    };
+    fetch(CONFIG.BACKEND_URL + '/api/regions')
+      .then(r => r.json())
+      .then(d => {
+        const names = (d.regions || []).map(r => regionNames[r] || r);
+        const el = document.getElementById('statRegion');
+        if (el) el.textContent = names.join(' · ') || '—';
+      }).catch(() => {});
   }
 
   function updateEmptyState() {
