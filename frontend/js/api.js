@@ -118,7 +118,7 @@ const Api = (() => {
       [...milFlights, ...openskyFlights].forEach(f => {
         const key = f.icao || Math.random();
         if (!flightMap.has(key) || f.source === 'airplanes.live') {
-          flightMap.set(key, { ...f, type: 'flight', last_seen: f.last_seen || new Date() });
+          flightMap.set(key, { ...f, type: 'flight', last_seen: f.last_seen ? new Date(f.last_seen) : new Date() });
         }
       });
 

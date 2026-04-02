@@ -49,7 +49,7 @@ const Regions = (() => {
   // ── INIT ──
   function init() {
     // Load current regions when modal opens
-    document.getElementById('settingsBtn')?.addEventListener('click', load);
+    document.getElementById('settingsBtn')?.addEventListener('click', () => setTimeout(load, 100));
 
     // Save regions when Save & Connect is clicked
     document.getElementById('saveApiBtn')?.addEventListener('click', save);

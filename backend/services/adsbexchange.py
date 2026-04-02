@@ -13,16 +13,45 @@ from models import FlightData
 AIRPLANES_LIVE_BASE = "https://api.airplanes.live/v2"
 
 
-def _in_middle_east(lat, lon) -> bool:
+REGIONS = {
+    "middle_east":   {"lat_min": 12.0, "lat_max": 42.0, "lon_min": 25.0,   "lon_max": 65.0},
+    "europe":        {"lat_min": 35.0, "lat_max": 72.0, "lon_min": -25.0,  "lon_max": 45.0},
+    "north_america": {"lat_min": 15.0, "lat_max": 75.0, "lon_min": -170.0, "lon_max": -50.0},
+    "south_america": {"lat_min": -60.0,"lat_max": 15.0, "lon_min": -85.0,  "lon_max": -30.0},
+    "asia_pacific":  {"lat_min": -50.0,"lat_max": 50.0, "lon_min": 65.0,   "lon_max": 180.0},
+    "africa":        {"lat_min": -35.0,"lat_max": 38.0, "lon_min": -20.0,  "lon_max": 52.0},
+    "arctic":        {"lat_min": 60.0, "lat_max": 90.0, "lon_min": -180.0, "lon_max": 180.0},
+}
+
+def _load_active_regions():
+    import json, os
+    try:
+        f = "/opt/apps/navytrack/backend/regions.json"
+        if os.path.exists(f):
+            with open(f) as fp:
+                return json.load(fp)
+    except:
+        pass
+    return ["middle_east"]
+
+def _in_active_region(lat, lon) -> bool:
     if lat is None or lon is None:
         return False
     try:
-        return (
-            MIDDLE_EAST["lat_min"] <= float(lat) <= MIDDLE_EAST["lat_max"] and
-            MIDDLE_EAST["lon_min"] <= float(lon) <= MIDDLE_EAST["lon_max"]
-        )
-    except (TypeError, ValueError):
-        return False
+        active = _load_active_regions()
+        for key in active:
+            r = REGIONS.get(key)
+            if not r:
+                continue
+            if (r["lat_min"] <= float(lat) <= r["lat_max"] and
+                r["lon_min"] <= float(lon) <= r["lon_max"]):
+                return True
+    except:
+        pass
+    return False
+
+def _in_middle_east(lat, lon) -> bool:
+    return _in_active_region(lat, lon)
 
 
 def _parse_aircraft(ac: dict) -> FlightData:

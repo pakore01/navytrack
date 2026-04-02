@@ -567,6 +567,9 @@
   max-height: 220px;
   object-fit: contain;
   background: #0a0a0a;
+  max-height: 200px;
+  width: 100%;
+  display: block;
   display: block;
 }
 .detail-photo-loading,
