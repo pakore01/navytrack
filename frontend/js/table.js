@@ -102,6 +102,50 @@ const Table = (() => {
     } catch { return null; }
   }
 
+  function inferDestination(heading, lat, lon) {
+    if (heading == null) return 'Unknown';
+    const h = parseFloat(heading);
+    // Based on heading and current position infer general direction
+    if (lat > 35 && lon > 25 && lon < 65) {
+      if (h >= 45  && h < 135) return 'Persian Gulf / Arabian Sea';
+      if (h >= 135 && h < 225) return 'Red Sea / Horn of Africa';
+      if (h >= 225 && h < 315) return 'Mediterranean';
+      return 'Middle East region';
+    }
+    if (lat > 35 && lon < 25) {
+      if (h >= 45  && h < 180) return 'Middle East';
+      if (h >= 180 && h < 270) return 'Africa';
+      return 'Europe';
+    }
+    if (lat > 15 && lat < 35) {
+      if (h >= 45  && h < 135) return 'Arabian Sea';
+      if (h >= 225 && h < 315) return 'Red Sea';
+      return 'Middle East';
+    }
+    // North America
+    if (lon < -50) {
+      if (h >= 45  && h < 135) return 'Atlantic / Europe';
+      if (h >= 225 && h < 315) return 'Pacific';
+      if (h >= 135 && h < 225) return 'South America';
+      return 'North America';
+    }
+    return 'Transit';
+  }
+
+  async function fetchNearestBase(lat, lon) {
+    if (!lat || !lon) return null;
+    try {
+      const res = await fetch(CONFIG.BACKEND_URL + '/api/bases/nearest', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({lat: lat, lon: lon, radius_km: 300})
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.found ? data : null;
+    } catch { return null; }
+  }
+
   function saveToHistory(row) {
     const entry = { icao: row.icao, callsign: row.callsign, aircraft: row.aircraft, lat: row.lat, lon: row.lon, seen: Date.now() };
     history.unshift(entry);
@@ -247,8 +291,8 @@ const Table = (() => {
       detailRow('Squawk', row.squawk || '—') +
       '</div>' +
       '<div class="detail-section"><div class="detail-section-title">Route</div>' +
-      detailRow('Origin', row.origin || '—', true) +
-      detailRow('Destination', row.destination || '—', true) +
+      detailRow('Origin', row.origin || 'Detecting...', true, 'origin') +
+      detailRow('Destination', (row.destination && row.destination !== 'Middle East') ? row.destination : inferDestination(row.heading, row.lat, row.lon), true) +
       detailRow('Last Update', row.last_seen ? new Date(row.last_seen).toUTCString() : '—', true) +
       '</div>' +
       (row.lat && row.lon ?
@@ -262,6 +306,17 @@ const Table = (() => {
 
     panel.classList.add('open');
     overlay.classList.add('visible');
+
+    // Fetch nearest base
+    if (row.lat && row.lon) {
+      fetchNearestBase(row.lat, row.lon).then(function(base) {
+        const originEl = body.querySelector('[data-key="origin"]');
+        if (base && originEl) {
+          originEl.textContent = base.flag + ' ' + base.name + ' (' + base.distance_km + ' km)';
+          originEl.style.color = 'var(--color-accent)';
+        }
+      });
+    }
 
     if (!isCarrier) {
       fetchPhoto(row.icao).then(function(photo) {
@@ -287,8 +342,9 @@ const Table = (() => {
     document.getElementById('detailOverlay') && document.getElementById('detailOverlay').classList.remove('visible');
   }
 
-  function detailRow(key, val, plain) {
-    return '<div class="detail-row"><span class="detail-key">' + escHtml(key) + '</span><span class="detail-val' + (plain ? ' plain' : '') + '">' + escHtml(String(val != null ? val : '—')) + '</span></div>';
+  function detailRow(key, val, plain, dataKey) {
+    const dk = dataKey ? ' data-key="' + dataKey + '"' : '';
+    return '<div class="detail-row"><span class="detail-key">' + escHtml(key) + '</span><span class="detail-val' + (plain ? ' plain' : '') + '"' + dk + '>' + escHtml(String(val != null ? val : '—')) + '</span></div>';
   }
 
   function escHtml(str) {
