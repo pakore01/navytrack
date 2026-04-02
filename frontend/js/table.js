@@ -10,7 +10,20 @@ const Table = (() => {
   let sortDir = 'asc';
   let knownICAOs = new Set();
   const detectionTimes = new Map();
-  const trailData = new Map(); // icao -> [{lat, lon, ts}]
+  // Load trail from localStorage
+  const trailData = new Map();
+  try {
+    const saved = JSON.parse(localStorage.getItem('navytrack_trails') || '{}');
+    Object.entries(saved).forEach(([icao, trail]) => trailData.set(icao, trail));
+  } catch {}
+
+  function saveTrails() {
+    try {
+      const obj = {};
+      trailData.forEach((trail, icao) => { obj[icao] = trail.slice(-30); });
+      localStorage.setItem('navytrack_trails', JSON.stringify(obj));
+    } catch {}
+  }
   let history = [];
   try { history = JSON.parse(localStorage.getItem('navytrack_history') || '[]'); } catch {}
 
@@ -264,6 +277,7 @@ const Table = (() => {
           trail.push({ lat: row.lat, lon: row.lon, ts: Date.now() });
           if (trail.length > 50) trail.shift();
           trailData.set(row.icao, trail);
+          saveTrails();
         }
       }
       knownICAOs.add(row.icao);
