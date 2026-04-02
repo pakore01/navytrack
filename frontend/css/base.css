@@ -118,3 +118,52 @@ input, select, button { font-family: var(--font-body); font-size: inherit; }
   position: absolute; width: 1px; height: 1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
 }
+
+/* ── LIGHT THEME ── */
+body.light {
+  background: #F4F5F7;
+  background-image: none;
+  color: #0D1117;
+}
+body.light {
+  --color-bg:            #F4F5F7;
+  --color-surface:       #FFFFFF;
+  --color-surface-2:     #F8F9FB;
+  --color-surface-3:     #ECEEF2;
+  --color-border:        rgba(0,0,0,0.08);
+  --color-border-subtle: rgba(0,0,0,0.04);
+  --color-border-accent: rgba(0,160,80,0.25);
+  --color-text-primary:  #0D1117;
+  --color-text-secondary:#4A5568;
+  --color-text-muted:    #9CA3AF;
+  --color-accent:        #00A050;
+  --color-accent-hover:  #008040;
+  --color-accent-light:  rgba(0,160,80,0.08);
+  --color-accent-glow:   rgba(0,160,80,0.2);
+  --color-blue:          #2563EB;
+  --color-blue-light:    rgba(37,99,235,0.08);
+  --color-success:       #00A050;
+  --color-success-bg:    rgba(0,160,80,0.08);
+  --color-danger:        #DC2626;
+  --color-danger-bg:     rgba(220,38,38,0.08);
+  --color-warning:       #D97706;
+  --color-warning-bg:    rgba(217,119,6,0.08);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.08);
+  --shadow-md:    0 4px 12px rgba(0,0,0,0.10);
+  --shadow-lg:    0 12px 32px rgba(0,0,0,0.12);
+  --shadow-panel: -4px 0 24px rgba(0,0,0,0.10);
+}
+
+/* ── LIGHT THEME FIXES ── */
+body.light .brand-name { color: #0D1117; }
+body.light .brand-sub { color: #6B7280; }
+body.light .brand-icon { color: #00A050; filter: none; }
+body.light .status-label { color: #4A5568; }
+body.light .status-time { color: #6B7280; background: #ECEEF2; border-color: rgba(0,0,0,0.08); }
+body.light .btn-icon { background: #ECEEF2; color: #4A5568; border-color: rgba(0,0,0,0.1); }
+body.light .btn-icon:hover { background: #E2E8F0; color: #00A050; border-color: rgba(0,160,80,0.3); }
+body.light .app-header { background: #FFFFFF; border-bottom-color: rgba(0,0,0,0.08); box-shadow: 0 1px 8px rgba(0,0,0,0.08); }
+body.light .stat-card::before { background: linear-gradient(90deg, transparent, #00A050, transparent); }
+body.light .stat-card::after { background: radial-gradient(circle, rgba(0,160,80,0.06) 0%, transparent 70%); }
+body.light .data-source-badge.live { color: #00A050; border-color: rgba(0,160,80,0.3); background: rgba(0,160,80,0.06); }
+body.light .status-dot.online { background: #00A050; box-shadow: 0 0 0 2px rgba(0,160,80,0.15), 0 0 8px rgba(0,160,80,0.3); }

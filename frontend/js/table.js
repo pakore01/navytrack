@@ -234,6 +234,34 @@ const Table = (() => {
     Utils.toast(flag + navy + ' New: ' + (row.callsign || row.icao) + ' — ' + (row.aircraft || 'Military'), 'info', 5000);
   }
 
+  const originData = new Map();
+  try {
+    const saved = JSON.parse(localStorage.getItem('navytrack_origins') || '{}');
+    Object.entries(saved).forEach(function(e) { originData.set(e[0], e[1]); });
+  } catch {}
+
+  function saveOrigins() {
+    try {
+      var obj = {};
+      originData.forEach(function(v, k) { obj[k] = v; });
+      localStorage.setItem('navytrack_origins', JSON.stringify(obj));
+    } catch {}
+  }
+
+  function fetchAndCacheOrigin(row) {
+    if (!row.lat || !row.lon || originData.has(row.icao)) return;
+    originData.set(row.icao, 'Detecting...');
+    fetchNearestBase(row.lat, row.lon).then(function(base) {
+      if (base) {
+        var val = base.flag + ' ' + base.name;
+        originData.set(row.icao, val);
+        saveOrigins();
+      } else {
+        originData.set(row.icao, '—');
+      }
+    });
+  }
+
   function render(data) {
     data = data || [];
     const tbody = document.getElementById('tableBody');
@@ -266,6 +294,7 @@ const Table = (() => {
         saveToHistory(row);
       }
       History.add(row);
+      fetchAndCacheOrigin(row);
       if (!detectionTimes.has(row.icao)) {
         detectionTimes.set(row.icao, Date.now());
       }
@@ -282,6 +311,7 @@ const Table = (() => {
       }
       knownICAOs.add(row.icao);
       const inZone  = timeInZone(row.icao);
+      const originCache = originData.get(row.icao) || '—';
       const mission = classifyMission(row.aircraft, row.callsign, row.heading);
 
       const heading = row.heading != null ? Math.round(row.heading) : null;
@@ -296,7 +326,7 @@ const Table = (() => {
         '<td>' + getAircraftIcon(row.aircraft) + ' ' + escHtml(row.aircraft || '—') +
         '<br><span style="font-family:var(--font-mono);font-size:0.6rem;color:' + mission.color + ';letter-spacing:0.06em">' + mission.icon + ' ' + mission.label + '</span>' +
         '</td>' +
-        '<td class="cell-muted">' + escHtml(row.origin || '—') + '</td>' +
+        '<td class="cell-muted" style="font-size:0.72rem">' + escHtml(originCache) + '</td>' +
         '<td class="cell-muted">' + escHtml(row.destination || '—') + '</td>' +
         '<td class="cell-mono">' + (isCarrier ? '—' : Utils.formatAlt(row.altitude)) + '</td>' +
         '<td class="cell-mono">' + Utils.formatSpeed(row.speed) + '</td>' +

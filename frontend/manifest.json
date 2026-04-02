@@ -1,6 +1,6 @@
 {
-  "name": "NavyTrack — US Navy Flight & Carrier Monitor",
-  "short_name": "NavyTrack",
+  "name": "AirForceTrack — Military Flight Tracker",
+  "short_name": "AirForceTrack",
   "description": "Real-time US Navy military flight and carrier vessel tracker for Middle East region",
   "start_url": "./index.html",
   "display": "standalone",

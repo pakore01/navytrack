@@ -5,7 +5,7 @@
 'use strict';
 
 const CONFIG = {
-  APP_NAME: 'NavyTrack',
+  APP_NAME: 'AirForceTrack',
   VERSION:  '1.0.0',
 
   // Backend API base URL (FastAPI)

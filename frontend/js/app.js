@@ -84,6 +84,7 @@ const App = (() => {
     console.log(`[App] ${CONFIG.APP_NAME} v${CONFIG.VERSION} starting…`);
 
     // Initialize modules
+    Theme.init();
     ApiKey.init();
     Alerts.init();
     Regions.init();
