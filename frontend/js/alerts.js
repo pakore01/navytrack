@@ -25,6 +25,17 @@ const Alerts = (() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(watchlist));
     } catch {}
+    syncToServer();
+  }
+
+  async function syncToServer() {
+    try {
+      await fetch(CONFIG.BACKEND_URL + "/api/watchlist", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({items: watchlist}),
+      });
+    } catch {}
   }
 
   // ── ADD CALLSIGN ──
