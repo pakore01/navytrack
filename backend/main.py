@@ -12,7 +12,8 @@ from routes.flights  import router as flights_router
 from routes.vessels  import router as vessels_router
 from routes.watchlist import router as watchlist_router
 from routes.regions  import router as regions_router
-from routes.bases    import router as bases_router
+from routes.bases       import router as bases_router
+from routes.zone_alert  import router as zone_alert_router
 
 app = FastAPI(
     title="NavyTrack API",
@@ -36,6 +37,7 @@ app.include_router(vessels_router, prefix="/api")
 app.include_router(watchlist_router, prefix="/api")
 app.include_router(regions_router,  prefix="/api")
 app.include_router(bases_router,    prefix="/api")
+app.include_router(zone_alert_router, prefix="/api")
 
 
 @app.get("/")

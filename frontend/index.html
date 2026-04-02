@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=1775136255" />
-  <link rel="stylesheet" href="css/layout.css?v=1775136255" />
-  <link rel="stylesheet" href="css/components.css?v=1775136255" />
-  <link rel="stylesheet" href="css/responsive.css?v=1775136255" />
+  <link rel="stylesheet" href="css/base.css?v=1775139580" />
+  <link rel="stylesheet" href="css/layout.css?v=1775139580" />
+  <link rel="stylesheet" href="css/components.css?v=1775139580" />
+  <link rel="stylesheet" href="css/responsive.css?v=1775139580" />
 </head>
 <body>
 
@@ -47,6 +47,13 @@
         <button class="btn-icon" id="exportBtn" title="Export CSV">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M10 3v10M6 9l4 4 4-4M4 15h12" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="btn-icon" id="zonesBtn" title="Alert Zones">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="10" cy="10" r="7"/>
+            <circle cx="10" cy="10" r="3"/>
+            <path d="M10 1v2M10 17v2M1 10h2M17 10h2" stroke-linecap="round"/>
           </svg>
         </button>
         <button class="btn-icon" id="statsBtn" title="Statistics">
@@ -284,6 +291,43 @@
     </div>
   </div>
 
+  <!-- ZONES PANEL -->
+  <div class="modal-overlay" id="zonesModal">
+    <div class="modal" style="max-width:620px">
+      <div class="modal-header">
+        <h2>Alert Zones</h2>
+        <p>Define geographic zones and get alerted when military aircraft enter them</p>
+      </div>
+      <div class="modal-body" style="max-height:70vh">
+        <div class="api-source">
+          <div class="api-source-header">
+            <span class="api-badge" style="background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">NEW ZONE</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+            <input type="text" class="api-input" id="zoneName" placeholder="Zone name (e.g. Persian Gulf)"/>
+            <input type="number" class="api-input" id="zoneRadius" placeholder="Radius (km)" value="100"/>
+            <input type="number" class="api-input" id="zoneLat" placeholder="Latitude (e.g. 26.0)" step="0.001"/>
+            <input type="number" class="api-input" id="zoneLon" placeholder="Longitude (e.g. 54.0)" step="0.001"/>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            <button class="zone-preset chip" data-name="Persian Gulf" data-lat="26.5" data-lon="51.5" data-radius="300">🌊 Persian Gulf</button>
+            <button class="zone-preset chip" data-name="Red Sea" data-lat="20.0" data-lon="38.5" data-radius="300">🌊 Red Sea</button>
+            <button class="zone-preset chip" data-name="Eastern Med" data-lat="35.0" data-lon="33.0" data-radius="300">🌊 E. Mediterranean</button>
+            <button class="zone-preset chip" data-name="Strait of Hormuz" data-lat="26.6" data-lon="56.2" data-radius="150">⚠ Hormuz</button>
+            <button class="zone-preset chip" data-name="Black Sea" data-lat="43.0" data-lon="34.0" data-radius="400">🌊 Black Sea</button>
+          </div>
+          <button class="btn-primary" id="addZoneBtn" style="margin-top:10px;width:100%;justify-content:center">+ Add Zone</button>
+        </div>
+        <div id="zonesList">
+          <div class="history-empty">No zones defined</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="closeZonesBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- HISTORY PANEL -->
   <div class="modal-overlay" id="historyModal">
     <div class="modal" style="max-width:700px">
@@ -318,16 +362,19 @@
   <!-- TOAST -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="js/config.js?v=1775136255"></script>
-  <script src="js/utils.js?v=1775136255"></script>
-  <script src="js/apikey.js?v=1775136255"></script>
-  <script src="js/api.js?v=1775136255"></script>
-  <script src="js/table.js?v=1775136255"></script>
-  <script src="js/filters.js?v=1775136255"></script>
-  <script src="js/alerts.js?v=1775136255"></script>
-  <script src="js/regions.js?v=1775136255"></script>
-  <script src="js/history.js?v=1775136255"></script>
-  <script src="js/stats.js?v=1775136255"></script>
-  <script src="js/app.js?v=1775136255"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/config.js?v=1775139580"></script>
+  <script src="js/utils.js?v=1775139580"></script>
+  <script src="js/apikey.js?v=1775139580"></script>
+  <script src="js/api.js?v=1775139580"></script>
+  <script src="js/table.js?v=1775139580"></script>
+  <script src="js/filters.js?v=1775139580"></script>
+  <script src="js/alerts.js?v=1775139580"></script>
+  <script src="js/regions.js?v=1775139580"></script>
+  <script src="js/zones.js"></script>
+  <script src="js/history.js?v=1775139580"></script>
+  <script src="js/stats.js?v=1775139580"></script>
+  <script src="js/app.js?v=1775139580"></script>
 </body>
 </html>

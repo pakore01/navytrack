@@ -124,6 +124,7 @@ const Api = (() => {
 
       STATE.raw.flights  = Array.from(flightMap.values());
       Alerts.check(STATE.raw.flights);
+      Zones.check(STATE.raw.flights);
       STATE.raw.carriers = Array.isArray(carriers) ? carriers.map(v => ({ ...v, type: 'carrier' })) : [];
       STATE.lastUpdate   = Date.now();
 

@@ -10,6 +10,7 @@ const Table = (() => {
   let sortDir = 'asc';
   let knownICAOs = new Set();
   const detectionTimes = new Map();
+  const trailData = new Map(); // icao -> [{lat, lon, ts}]
   let history = [];
   try { history = JSON.parse(localStorage.getItem('navytrack_history') || '[]'); } catch {}
 
@@ -100,6 +101,67 @@ const Table = (() => {
         link: photo.link || '',
       };
     } catch { return null; }
+  }
+
+  function classifyMission(aircraft, callsign, heading) {
+    const a = (aircraft || '').toUpperCase();
+    const c = (callsign  || '').toUpperCase();
+
+    // By aircraft type
+    if (a.includes('KC-135') || a.includes('KC-10') || a.includes('STRATOTANKER') ||
+        a.includes('TANKER') || a.includes('VOYAGER') || a.includes('A330 MRTT'))
+      return { label: 'AERIAL REFUELING', icon: '⛽', color: '#F59E0B' };
+
+    if (a.includes('P-8') || a.includes('POSEIDON') || a.includes('P-3') || a.includes('ORION') ||
+        a.includes('ATLANTIC') || a.includes('MARTIME PATROL'))
+      return { label: 'MARITIME PATROL', icon: '🔍', color: '#3B82F6' };
+
+    if (a.includes('E-2') || a.includes('HAWKEYE') || a.includes('E-3') || a.includes('SENTRY') ||
+        a.includes('AWACS') || a.includes('AEW') || a.includes('WEDGETAIL'))
+      return { label: 'AEW&C', icon: '📡', color: '#8B5CF6' };
+
+    if (a.includes('EA-18') || a.includes('GROWLER') || a.includes('EA-6') ||
+        a.includes('ELECTRONIC') || a.includes('RIVET'))
+      return { label: 'ELECTRONIC WARFARE', icon: '⚡', color: '#EF4444' };
+
+    if (a.includes('RC-135') || a.includes('U-2') || a.includes('RQ') ||
+        a.includes('GLOBAL HAWK') || a.includes('SENTINEL') || a.includes('RECON'))
+      return { label: 'RECONNAISSANCE', icon: '👁', color: '#EC4899' };
+
+    if (a.includes('E-6') || a.includes('MERCURY') || a.includes('COMMAND') ||
+        a.includes('E-4') || a.includes('NIGHTWATCH'))
+      return { label: 'COMMAND & CONTROL', icon: '📻', color: '#10B981' };
+
+    if (a.includes('C-130') || a.includes('C-17') || a.includes('C-5') || a.includes('C-2') ||
+        a.includes('HERCULES') || a.includes('GLOBEMASTER') || a.includes('GALAXY') ||
+        a.includes('GREYHOUND') || a.includes('ATLAS') || a.includes('A400'))
+      return { label: 'TRANSPORT', icon: '📦', color: '#6366F1' };
+
+    if (a.includes('MH-60') || a.includes('SEAHAWK') || a.includes('BLACK HAWK') ||
+        a.includes('CHINOOK') || a.includes('CH-47') || a.includes('MH-53'))
+      return { label: 'ROTARY WING', icon: '🚁', color: '#14B8A6' };
+
+    if (a.includes('F-16') || a.includes('F-18') || a.includes('F-35') || a.includes('F-15') ||
+        a.includes('HORNET') || a.includes('FALCON') || a.includes('TYPHOON') ||
+        a.includes('RAFALE') || a.includes('GRIPEN'))
+      return { label: 'COMBAT AIR PATROL', icon: '🚀', color: '#EF4444' };
+
+    if (a.includes('T-38') || a.includes('T-6') || a.includes('TEXAN') ||
+        a.includes('TALON') || a.includes('HAWK') || a.includes('TRAINING'))
+      return { label: 'TRAINING', icon: '🎓', color: '#94A3B8' };
+
+    if (a.includes('BEECH') || a.includes('KING AIR') || a.includes('CITATION') ||
+        a.includes('CESSNA') || a.includes('DORNIER'))
+      return { label: 'LIAISON / SURVEY', icon: '✈', color: '#64748B' };
+
+    // By callsign prefix
+    if (c.startsWith('RCH'))  return { label: 'TRANSPORT', icon: '📦', color: '#6366F1' };
+    if (c.startsWith('NAVY')) return { label: 'NAVAL OPS', icon: '⚓', color: '#3B82F6' };
+    if (c.startsWith('JAKE')) return { label: 'MARITIME PATROL', icon: '🔍', color: '#3B82F6' };
+    if (c.startsWith('REACH'))return { label: 'TRANSPORT', icon: '📦', color: '#6366F1' };
+    if (c.startsWith('COBRA'))return { label: 'TRAINING', icon: '🎓', color: '#94A3B8' };
+
+    return { label: 'MILITARY OPS', icon: '✈', color: '#00D478' };
   }
 
   function inferDestination(heading, lat, lon) {
@@ -194,8 +256,19 @@ const Table = (() => {
       if (!detectionTimes.has(row.icao)) {
         detectionTimes.set(row.icao, Date.now());
       }
+      // Record trail position
+      if (row.lat && row.lon) {
+        const trail = trailData.get(row.icao) || [];
+        const last = trail[trail.length - 1];
+        if (!last || Math.abs(last.lat - row.lat) > 0.01 || Math.abs(last.lon - row.lon) > 0.01) {
+          trail.push({ lat: row.lat, lon: row.lon, ts: Date.now() });
+          if (trail.length > 50) trail.shift();
+          trailData.set(row.icao, trail);
+        }
+      }
       knownICAOs.add(row.icao);
-      const inZone = timeInZone(row.icao);
+      const inZone  = timeInZone(row.icao);
+      const mission = classifyMission(row.aircraft, row.callsign, row.heading);
 
       const heading = row.heading != null ? Math.round(row.heading) : null;
       const headingCell = heading != null
@@ -206,7 +279,9 @@ const Table = (() => {
         '<td><span class="type-badge ' + row.type + '">' + (row.type === 'carrier' ? '⚓ Carrier' : '✈ Flight') + '</span></td>' +
         '<td class="cell-callsign">' + flag + ' ' + escHtml(row.callsign || '—') + navyBadge + '</td>' +
         '<td class="cell-mono cell-muted">' + escHtml(row.icao) + '</td>' +
-        '<td>' + getAircraftIcon(row.aircraft) + ' ' + escHtml(row.aircraft || '—') + '</td>' +
+        '<td>' + getAircraftIcon(row.aircraft) + ' ' + escHtml(row.aircraft || '—') +
+        '<br><span style="font-family:var(--font-mono);font-size:0.6rem;color:' + mission.color + ';letter-spacing:0.06em">' + mission.icon + ' ' + mission.label + '</span>' +
+        '</td>' +
         '<td class="cell-muted">' + escHtml(row.origin || '—') + '</td>' +
         '<td class="cell-muted">' + escHtml(row.destination || '—') + '</td>' +
         '<td class="cell-mono">' + (isCarrier ? '—' : Utils.formatAlt(row.altitude)) + '</td>' +
@@ -275,6 +350,7 @@ const Table = (() => {
       (navy ? '<div class="detail-navy-banner">🇺🇸 US Navy Aircraft</div>' : '') +
       '<div class="detail-section"><div class="detail-section-title">Identification</div>' +
       detailRow('Type', isCarrier ? '⚓ Carrier' : '✈ Military Flight') +
+      '<div class="detail-row"><span class="detail-key">MISSION</span><span class="detail-val" style="color:' + classifyMission(row.aircraft, row.callsign, row.heading).color + ';font-weight:700">' + classifyMission(row.aircraft, row.callsign, row.heading).icon + ' ' + classifyMission(row.aircraft, row.callsign, row.heading).label + '</span></div>' +
       detailRow('Callsign', row.callsign) +
       detailRow(isCarrier ? 'MMSI' : 'ICAO Hex', row.icao) +
       detailRow(isCarrier ? 'Hull Number' : 'Registration', row.registration || '—') +
@@ -296,16 +372,75 @@ const Table = (() => {
       detailRow('Last Update', row.last_seen ? new Date(row.last_seen).toUTCString() : '—', true) +
       '</div>' +
       (row.lat && row.lon ?
-        '<div class="detail-section"><div class="detail-section-title">Live Position</div>' +
-        '<div class="detail-map-wrap"><iframe src="https://www.openstreetmap.org/export/embed.html?bbox=' +
-        (row.lon - 3) + '%2C' + (row.lat - 3) + '%2C' + (row.lon + 3) + '%2C' + (row.lat + 3) +
-        '&layer=mapnik&marker=' + row.lat + '%2C' + row.lon +
-        '" class="detail-map" loading="lazy"></iframe></div>' +
+        '<div class="detail-section"><div class="detail-section-title">Live Position & Trail</div>' +
+        '<div class="detail-map-wrap" id="trailMapWrap" style="height:220px;background:#0D1421;border-radius:8px;overflow:hidden;position:relative">' +
+        '<div id="trailMap" style="width:100%;height:100%"></div>' +
+        '</div>' +
         '<a class="btn-secondary" style="margin-top:8px;justify-content:center;display:flex" href="https://www.openstreetmap.org/?mlat=' + row.lat + '&mlon=' + row.lon + '&zoom=7" target="_blank" rel="noopener">Open full map ↗</a>' +
         '</div>' : '');
 
     panel.classList.add('open');
     overlay.classList.add('visible');
+
+    // Initialize trail map with Leaflet
+    if (row.lat && row.lon) {
+      setTimeout(function() {
+        const mapEl = document.getElementById('trailMap');
+        if (!mapEl) return;
+
+        // Remove existing map if any
+        if (window._navyMap) {
+          window._navyMap.remove();
+          window._navyMap = null;
+        }
+
+        const map = L.map('trailMap', {
+          center: [row.lat, row.lon],
+          zoom: 6,
+          zoomControl: true,
+          attributionControl: false
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19
+        }).addTo(map);
+
+        // Draw trail
+        const trail = trailData.get(row.icao) || [];
+        if (trail.length > 1) {
+          const latlngs = trail.map(p => [p.lat, p.lon]);
+          L.polyline(latlngs, {
+            color: '#00D478',
+            weight: 2,
+            opacity: 0.8,
+            dashArray: '4 4'
+          }).addTo(map);
+
+          // Trail dots
+          trail.forEach(function(p, i) {
+            if (i < trail.length - 1) {
+              L.circleMarker([p.lat, p.lon], {
+                radius: 2,
+                fillColor: '#00D478',
+                fillOpacity: 0.5,
+                color: 'transparent'
+              }).addTo(map);
+            }
+          });
+        }
+
+        // Current position marker
+        const icon = L.divIcon({
+          html: '<div style="width:12px;height:12px;background:#00D478;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px #00D478"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+          className: ''
+        });
+        L.marker([row.lat, row.lon], { icon: icon }).addTo(map);
+
+        window._navyMap = map;
+      }, 100);
+    }
 
     // Fetch nearest base
     if (row.lat && row.lon) {
