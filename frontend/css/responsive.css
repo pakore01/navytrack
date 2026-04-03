@@ -1,6 +1,6 @@
 /* ============================================================
    RESPONSIVE.CSS — Mobile, tablet, desktop
-   NavyTrack
+   AirForceTrack
    ============================================================ */
 
 /* ── TABLET (≤ 1024px) ── */
@@ -19,116 +19,154 @@
     --header-h: 52px;
   }
 
-  /* HEADER */
+  /* ── HEADER ── */
   .header-inner {
     padding: 0 12px;
     gap: 8px;
+    overflow: hidden;
   }
+
   .brand-sub { display: none; }
   .brand-name { font-size: 1rem; }
   .brand-icon { width: 28px; height: 28px; }
 
-  /* STATUS — compact */
+  /* Status compacto */
   .header-status {
     flex: 1;
     justify-content: center;
     gap: 5px;
     overflow: hidden;
+    min-width: 0;
   }
   .status-label {
     font-size: 0.68rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
+    max-width: 110px;
   }
   .status-time { display: none; }
   .status-dot { width: 6px; height: 6px; flex-shrink: 0; }
 
-  /* HEADER ACTIONS */
-  .header-actions { gap: 4px; }
-  .btn-icon { width: 32px; height: 32px; }
-  .btn-icon svg { width: 14px; height: 14px; }
-
-  /* MAIN */
-  .app-main {
-    padding: 12px 12px 32px;
-    gap: 10px;
+  /* Botones header */
+  .header-actions {
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .btn-icon svg {
+    width: 14px;
+    height: 14px;
   }
 
-  /* STATS BAR */
-  .stats-bar {
-    grid-template-columns: repeat(2, 1fr);
+  /* ── MAIN ── */
+  .app-main {
+    padding: 10px 10px 28px;
     gap: 8px;
   }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
   .stat-card {
-    padding: 12px 14px;
+    padding: 10px 12px;
   }
   .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
   }
   .stat-label {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
   }
 
-  /* FILTERS */
+  /* ── FILTERS — bloque compacto ── */
   .filters-bar {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
-    padding: 12px 14px;
+    gap: 8px;
+    padding: 10px 12px;
   }
   .filters-left {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
   .filters-right {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
+    gap: 8px;
   }
-  .filter-chips { flex-wrap: wrap; gap: 6px; }
-  .chip { padding: 6px 14px; font-size: 0.82rem; }
+
+  .filter-chips {
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .chip {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+  }
+
+  /* Evitar zoom en iOS — inputs a 16px mínimo */
+  .filter-select,
+  .search-input,
+  .api-input {
+    font-size: 16px;
+  }
+
   .filter-select {
     width: 100%;
-    padding: 9px 28px 9px 10px;
-    font-size: 0.85rem;
+    padding: 8px 28px 8px 10px;
   }
+
   .search-wrap { width: 100%; }
   .search-input {
     width: 100%;
-    font-size: 0.85rem;
-    padding: 9px 12px 9px 32px;
+    padding: 8px 12px 8px 32px;
   }
   .search-input:focus { width: 100%; }
+
   .refresh-control {
     display: flex;
     align-items: center;
     gap: 10px;
   }
+  .refresh-control .filter-label { white-space: nowrap; flex-shrink: 0; }
   .refresh-control .filter-select { flex: 1; }
 
-  /* TABLE */
+  /* ── TABLA ── */
+  /* Offset calculado: header(52) + stats(~120) + filters(~200) + table-header(44) + padding(20) */
   .table-scroll {
-    max-height: calc(100vh - 380px);
-    min-height: 200px;
+    max-height: calc(100vh - 460px);
+    min-height: 180px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .data-table { font-size: 0.78rem; }
-  .data-table th { padding: 8px 10px; font-size: 0.65rem; }
-  .data-table td { padding: 10px 10px; }
 
-  /* Hide less critical columns on mobile */
+  .data-table { font-size: 0.76rem; }
+  .data-table th { padding: 7px 8px; font-size: 0.62rem; }
+  .data-table td { padding: 9px 8px; }
+
+  /* Columnas ocultas en móvil:
+     Visible: Type(1), Callsign(2), ICAO(3), Aircraft(4), Altitude(7), Speed(8), Status(11), Updated(12)
+     Oculto:  Origin(5), Destination(6), Heading(9), Position(10), InZone(13) */
   .data-table th:nth-child(5),
   .data-table td:nth-child(5),
   .data-table th:nth-child(6),
   .data-table td:nth-child(6),
+  .data-table th:nth-child(9),
+  .data-table td:nth-child(9),
   .data-table th:nth-child(10),
-  .data-table td:nth-child(10) {
+  .data-table td:nth-child(10),
+  .data-table th:nth-child(13),
+  .data-table td:nth-child(13) {
     display: none;
   }
 
-  /* DETAIL PANEL */
+  /* ── DETAIL PANEL — sube desde abajo ── */
   .detail-panel {
     width: 100%;
     top: auto;
@@ -138,7 +176,7 @@
   }
   .detail-panel.open { transform: translateY(0); }
 
-  /* MODAL */
+  /* ── MODALES — hoja inferior ── */
   .modal-overlay {
     align-items: flex-end;
     padding: 0;
@@ -152,56 +190,72 @@
   .modal-body {
     max-height: 65vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .modal-header { padding: 20px 20px 16px; }
-  .modal-footer { padding: 12px 20px 28px; }
+  .modal-header { padding: 18px 18px 14px; }
+  .modal-footer { padding: 10px 18px 28px; }
 
-  /* API MODAL */
+  /* API modal */
   .api-row { grid-template-columns: 1fr; }
-  .api-source { padding: 12px; }
-  .regions-grid { grid-template-columns: 1fr; }
+  .api-source { padding: 10px 12px; }
+  .regions-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
 
-  /* TOAST */
+  /* Zones modal — grid inputs en columna */
+  #zonesModal .modal-body [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── TOAST ── */
   .toast-container {
     bottom: 16px;
-    right: 12px;
-    left: 12px;
+    right: 10px;
+    left: 10px;
   }
-  .toast { max-width: 100%; font-size: 0.8rem; }
+  .toast {
+    max-width: 100%;
+    font-size: 0.78rem;
+  }
 
-  /* HEADING DIAL */
-  .heading-dial { width: 24px; height: 24px; }
-  .heading-dial svg { width: 24px; height: 24px; }
+  /* ── HEADING DIAL ── */
+  .heading-dial { width: 22px; height: 22px; }
+  .heading-dial svg { width: 22px; height: 22px; }
 
-  /* DETAIL MAP */
-  .detail-map { height: 180px; }
-  .detail-photo { max-height: 180px; }
+  /* ── DETAIL MAP Y FOTO ── */
+  .detail-map { height: 170px; }
+  .detail-photo { max-height: 170px; }
 }
 
-/* ── SMALL MOBILE (≤ 390px) ── */
-@media (max-width: 390px) {
-  .stat-value { font-size: 1.3rem; }
-  .brand-name { font-size: 0.95rem; }
-  .status-label { max-width: 90px; }
+/* ── SMALL MOBILE (≤ 420px) ── */
+@media (max-width: 420px) {
+  .stat-value { font-size: 1.25rem; }
+  .brand-name { font-size: 0.92rem; }
+  .status-label { max-width: 80px; }
 
-  /* Hide extra header buttons */
-  .header-actions .btn-icon:nth-child(2) { display: none; }
-
-  /* Table — show only essentials */
-  .data-table th:nth-child(4),
-  .data-table td:nth-child(4),
-  .data-table th:nth-child(9),
-  .data-table td:nth-child(9) {
+  /* Ocultar botones menos críticos:
+     Mantener: refresh(1), zones(3), alerts-history(5), settings(8)
+     Ocultar:  export(2), stats(4), history(6), theme(7) */
+  .header-actions .btn-icon:nth-child(2),
+  .header-actions .btn-icon:nth-child(4),
+  .header-actions .btn-icon:nth-child(6),
+  .header-actions .btn-icon:nth-child(7) {
     display: none;
   }
+
+  /* Tabla: ocultar también Aircraft en pantallas muy pequeñas */
+  .data-table th:nth-child(4),
+  .data-table td:nth-child(4) {
+    display: none;
+  }
+
+  .filters-bar { padding: 8px 10px; }
+  .chip { padding: 4px 10px; font-size: 0.76rem; }
+
+  .app-main { padding: 8px 8px 24px; }
 }
 
-/* ── TABLET PORTRAIT (768px - 1024px) ── */
+/* ── TABLET PORTRAIT (769px - 1024px) ── */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .filters-bar {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
+  .filters-bar { flex-wrap: wrap; gap: 12px; }
   .filters-left { flex-wrap: wrap; }
   .search-input { width: 220px; }
   .detail-panel { width: 380px; }
