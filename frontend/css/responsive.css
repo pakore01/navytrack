@@ -62,6 +62,14 @@
     height: 14px;
   }
 
+  /* Ocultar en móvil: Export(2), Alerts History(5), Flight History(6) */
+  /* Visibles: Refresh(1), Zones(3), Stats(4), Theme(7), Settings(8) */
+  #exportBtn,
+  #alertsHistoryBtn,
+  #historyBtn {
+    display: none;
+  }
+
   /* ── MAIN ── */
   .app-main {
     padding: 10px 10px 28px;
@@ -231,16 +239,6 @@
   .brand-name { font-size: 0.92rem; }
   .status-label { max-width: 80px; }
 
-  /* Ocultar botones menos críticos:
-     Mantener: refresh(1), zones(3), alerts-history(5), settings(8)
-     Ocultar:  export(2), stats(4), history(6), theme(7) */
-  .header-actions .btn-icon:nth-child(2),
-  .header-actions .btn-icon:nth-child(4),
-  .header-actions .btn-icon:nth-child(6),
-  .header-actions .btn-icon:nth-child(7) {
-    display: none;
-  }
-
   /* Tabla: ocultar también Aircraft en pantallas muy pequeñas */
   .data-table th:nth-child(4),
   .data-table td:nth-child(4) {
@@ -268,3 +266,4 @@
   .data-table { font-size: 0.85rem; }
   .stat-value { font-size: 2rem; }
 }
+
