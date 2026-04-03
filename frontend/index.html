@@ -9,10 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css?v=1775212371" />
-  <link rel="stylesheet" href="css/layout.css?v=1775212371" />
-  <link rel="stylesheet" href="css/components.css?v=1775212371" />
-  <link rel="stylesheet" href="css/responsive.css?v=1775212371" />
+  <link rel="stylesheet" href="css/base.css?v=1775220000" />
+  <link rel="stylesheet" href="css/layout.css?v=1775220000" />
+  <link rel="stylesheet" href="css/components.css?v=1775220000" />
+  <link rel="stylesheet" href="css/responsive.css?v=1775220000" />
 </head>
 <body>
 
@@ -39,11 +39,15 @@
         <span class="status-time" id="lastUpdate">--:--:-- UTC</span>
       </div>
       <div class="header-actions">
+
+        <!-- Refresh — siempre visible -->
         <button class="btn-icon" id="refreshBtn" title="Refresh data">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M4 10a6 6 0 1 1 1.5 4M4 14v-4h4" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
+
+        <!-- Botones secundarios — visibles en desktop, ocultos en móvil -->
         <button class="btn-icon" id="exportBtn" title="Export CSV">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M10 3v10M6 9l4 4 4-4M4 15h12" stroke-linecap="round" stroke-linejoin="round"/>
@@ -79,12 +83,72 @@
             <path d="M10 2a8 8 0 1 0 8 8 6 6 0 0 1-8-8z" stroke-linecap="round"/>
           </svg>
         </button>
+
+        <!-- Settings — siempre visible -->
         <button class="btn-icon" id="settingsBtn" title="API Settings">
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
             <circle cx="10" cy="10" r="3"/>
             <path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42" stroke-linecap="round"/>
           </svg>
         </button>
+
+        <!-- MOBILE ONLY: botón ··· -->
+        <button class="btn-icon" id="mobileMenuBtn" title="More options" style="display:none">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <circle cx="4" cy="10" r="1.5"/>
+            <circle cx="10" cy="10" r="1.5"/>
+            <circle cx="16" cy="10" r="1.5"/>
+          </svg>
+        </button>
+
+        <!-- Overlay para cerrar el menú tocando fuera -->
+        <div class="mobile-dropdown-overlay" id="mobileDropdownOverlay"></div>
+
+        <!-- DROPDOWN MENU -->
+        <div class="mobile-dropdown" id="mobileDropdown">
+          <button class="mobile-dropdown-item" id="dd-zones">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="10" cy="10" r="7"/>
+              <circle cx="10" cy="10" r="3"/>
+              <path d="M10 1v2M10 17v2M1 10h2M17 10h2" stroke-linecap="round"/>
+            </svg>
+            Alert Zones
+          </button>
+          <button class="mobile-dropdown-item" id="dd-stats">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 14h3V8H3v6zM8 14h3V4H8v10zM13 14h3v-4h-3v4z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Statistics
+          </button>
+          <button class="mobile-dropdown-item" id="dd-alerts">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2z"/>
+              <path d="M10 6v4l3 2" stroke-linecap="round"/>
+              <path d="M3 3l14 14" stroke-linecap="round" stroke-width="1.2"/>
+            </svg>
+            Alerts History
+          </button>
+          <button class="mobile-dropdown-item" id="dd-history">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="10" cy="10" r="8"/>
+              <path d="M10 6v4l3 2" stroke-linecap="round"/>
+            </svg>
+            Flight History
+          </button>
+          <button class="mobile-dropdown-item" id="dd-theme">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M10 2a8 8 0 1 0 8 8 6 6 0 0 1-8-8z" stroke-linecap="round"/>
+            </svg>
+            Toggle Theme
+          </button>
+          <button class="mobile-dropdown-item" id="dd-export">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M10 3v10M6 9l4 4 4-4M4 15h12" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Export CSV
+          </button>
+        </div>
+
       </div>
     </div>
   </header>
@@ -287,7 +351,6 @@
 
   </main>
 
-
   <!-- STATS PANEL -->
   <div class="modal-overlay" id="statsModal">
     <div class="modal" style="max-width:700px">
@@ -393,18 +456,18 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/theme.js"></script>
-  <script src="js/config.js?v=1775212371"></script>
-  <script src="js/utils.js?v=1775212371"></script>
-  <script src="js/apikey.js?v=1775212371"></script>
-  <script src="js/api.js?v=1775212371"></script>
-  <script src="js/table.js?v=1775212371"></script>
-  <script src="js/filters.js?v=1775212371"></script>
-  <script src="js/alerts.js?v=1775212371"></script>
-  <script src="js/regions.js?v=1775212371"></script>
+  <script src="js/config.js?v=1775220000"></script>
+  <script src="js/utils.js?v=1775220000"></script>
+  <script src="js/apikey.js?v=1775220000"></script>
+  <script src="js/api.js?v=1775220000"></script>
+  <script src="js/table.js?v=1775220000"></script>
+  <script src="js/filters.js?v=1775220000"></script>
+  <script src="js/alerts.js?v=1775220000"></script>
+  <script src="js/regions.js?v=1775220000"></script>
   <script src="js/zones.js"></script>
-  <script src="js/alerts_history.js?v=1775212371"></script>
-  <script src="js/history.js?v=1775212371"></script>
-  <script src="js/stats.js?v=1775212371"></script>
-  <script src="js/app.js?v=1775212371"></script>
+  <script src="js/alerts_history.js?v=1775220000"></script>
+  <script src="js/history.js?v=1775220000"></script>
+  <script src="js/stats.js?v=1775220000"></script>
+  <script src="js/app.js?v=1775220000"></script>
 </body>
 </html>
