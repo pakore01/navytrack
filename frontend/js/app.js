@@ -56,41 +56,23 @@ const App = (() => {
 
     overlay.addEventListener('click', closeMenu);
 
-    // Abrir modales directamente — no depende de listeners externos
-    const actions = {
-      'dd-zones': () => {
-        document.getElementById('zonesModal')?.classList.add('visible');
-      },
-      'dd-stats': () => {
-        document.getElementById('statsModal')?.classList.add('visible');
-        // Disparar render de stats si existe la función
-        if (typeof renderStats === 'function') renderStats();
-      },
-      'dd-alerts': () => {
-        document.getElementById('alertsHistoryModal')?.classList.add('visible');
-        // Recargar historial si existe la función
-        if (typeof loadAlertsHistory === 'function') loadAlertsHistory();
-      },
-      'dd-history': () => {
-        document.getElementById('historyModal')?.classList.add('visible');
-        // Render historial si existe la función
-        if (typeof renderHistory === 'function') renderHistory();
-      },
-      'dd-theme': () => {
-        // Disparar el botón de theme directamente
-        document.getElementById('themeBtn')?.click();
-      },
-      'dd-export': () => {
-        Utils.exportCSV(STATE.display, 'airforcetrack-export.csv');
-      },
+    // Conectar items del dropdown con los botones reales
+    // Los módulos ya están inicializados en este punto, .click() funciona
+    const map = {
+      'dd-zones':   'zonesBtn',
+      'dd-stats':   'statsBtn',
+      'dd-alerts':  'alertsHistoryBtn',
+      'dd-history': 'historyBtn',
+      'dd-theme':   'themeBtn',
+      'dd-export':  'exportBtn',
     };
 
-    Object.entries(actions).forEach(([ddId, action]) => {
+    Object.entries(map).forEach(([ddId, btnId]) => {
       const item = document.getElementById(ddId);
       if (item) {
         item.addEventListener('click', () => {
           closeMenu();
-          action();
+          document.getElementById(btnId)?.click();
         });
       }
     });
@@ -146,10 +128,18 @@ const App = (() => {
   async function init() {
     console.log(`[App] ${CONFIG.APP_NAME} v${CONFIG.VERSION} starting…`);
 
-    // Initialize modules
+    // Initialize core modules
     ApiKey.init();
     Table.init();
     Filters.init();
+
+    // Initialize feature modules
+    if (typeof Zones !== 'undefined')         Zones.init();
+    if (typeof Stats !== 'undefined')         Stats.init();
+    if (typeof History !== 'undefined')       History.init();
+    if (typeof AlertsHistory !== 'undefined') AlertsHistory.init();
+
+    // Bind global events and mobile menu
     bindEvents();
     initMobileMenu();
     restoreSettings();
