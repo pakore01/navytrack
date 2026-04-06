@@ -70,7 +70,7 @@ const Api = (() => {
           aircraft:    null,
           registration: null,
           origin:      s[2] || '—',
-          destination: 'Middle East region',
+          destination: '—',
           lat:         s[6],
           lon:         s[5],
           altitude:    s[7] != null ? Math.round(s[7] * 3.28084) : null,
