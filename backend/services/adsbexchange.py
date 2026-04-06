@@ -1,9 +1,11 @@
 """
 services/adsbexchange.py
-Fetch US military flights from airplanes.live (free, no key required).
+Fetch US military flights from airplanes.live + adsb.fi (free, no key required).
+Both sources are queried in parallel and merged by ICAO hex.
 """
 
 import httpx
+import asyncio
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
@@ -11,7 +13,7 @@ from config import MIDDLE_EAST, REQUEST_TIMEOUT
 from models import FlightData
 
 AIRPLANES_LIVE_BASE = "https://api.airplanes.live/v2"
-
+ADSBFI_BASE         = "https://api.adsb.fi/v1"
 
 REGIONS = {
     "middle_east":   {"lat_min": 12.0, "lat_max": 42.0, "lon_min": 25.0,   "lon_max": 65.0},
@@ -53,8 +55,7 @@ def _in_active_region(lat, lon) -> bool:
 def _in_middle_east(lat, lon) -> bool:
     return _in_active_region(lat, lon)
 
-
-def _parse_aircraft(ac: dict) -> FlightData:
+def _parse_aircraft(ac: dict, source: str = "airplanes.live") -> FlightData:
     alt_raw = ac.get("alt_baro") or ac.get("alt_geom")
     try:
         altitude = int(alt_raw) if alt_raw and alt_raw != "ground" else 0
@@ -87,36 +88,82 @@ def _parse_aircraft(ac: dict) -> FlightData:
         heading      = heading,
         on_ground    = on_ground,
         squawk       = ac.get("squawk") or None,
-        source       = "airplanes.live",
+        source       = source,
     )
 
+async def _fetch_airplanes_live(client: httpx.AsyncClient) -> list[FlightData]:
+    """Fetch military aircraft from airplanes.live"""
+    results = []
+    try:
+        resp = await client.get(
+            f"{AIRPLANES_LIVE_BASE}/mil",
+            headers={"User-Agent": "AirForceTrack/1.0"},
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            for ac in data.get("ac", []):
+                lat = ac.get("lat")
+                lon = ac.get("lon")
+                if _in_middle_east(lat, lon):
+                    results.append(_parse_aircraft(ac, "airplanes.live"))
+    except Exception as e:
+        print(f"[airplanes.live] Error: {e}")
+    return results
+
+async def _fetch_adsbfi(client: httpx.AsyncClient) -> list[FlightData]:
+    """Fetch military aircraft from adsb.fi"""
+    results = []
+    try:
+        resp = await client.get(
+            f"{ADSBFI_BASE}/military",
+            headers={"User-Agent": "AirForceTrack/1.0"},
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            for ac in data.get("ac", []):
+                lat = ac.get("lat")
+                lon = ac.get("lon")
+                if _in_middle_east(lat, lon):
+                    results.append(_parse_aircraft(ac, "adsb.fi"))
+    except Exception as e:
+        print(f"[adsb.fi] Error: {e}")
+    return results
 
 async def fetch_navy_flights(api_key: str = None) -> list[FlightData]:
     """
-    Fetch all military aircraft globally from airplanes.live
-    and filter to Middle East bounding box.
-    No API key required.
+    Fetch military aircraft from airplanes.live AND adsb.fi in parallel.
+    Merge by ICAO hex — airplanes.live takes priority on duplicates.
+    No API key required for either source.
     """
-    results: list[FlightData] = []
-
     async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-        try:
-            resp = await client.get(
-                f"{AIRPLANES_LIVE_BASE}/mil",
-                headers={"User-Agent": "NavyTrack/1.0"},
-            )
+        # Fetch both sources in parallel
+        results_live, results_fi = await asyncio.gather(
+            _fetch_airplanes_live(client),
+            _fetch_adsbfi(client),
+            return_exceptions=True
+        )
 
-            if resp.status_code == 200:
-                data = resp.json()
-                for ac in data.get("ac", []):
-                    lat = ac.get("lat")
-                    lon = ac.get("lon")
-                    if _in_middle_east(lat, lon):
-                        results.append(_parse_aircraft(ac))
+    # Handle exceptions from gather
+    if isinstance(results_live, Exception):
+        print(f"[airplanes.live] Failed: {results_live}")
+        results_live = []
+    if isinstance(results_fi, Exception):
+        print(f"[adsb.fi] Failed: {results_fi}")
+        results_fi = []
 
-        except httpx.TimeoutException:
-            raise TimeoutError("airplanes.live request timed out")
-        except httpx.RequestError as e:
-            raise ConnectionError(f"airplanes.live connection error: {e}")
+    # Merge — airplanes.live takes priority on duplicate ICAOs
+    merged: dict[str, FlightData] = {}
 
-    return results
+    # Add adsb.fi first (lower priority)
+    for flight in results_fi:
+        if flight.icao:
+            merged[flight.icao] = flight
+
+    # Add airplanes.live second (overwrites duplicates)
+    for flight in results_live:
+        if flight.icao:
+            merged[flight.icao] = flight
+
+    print(f"[fetch] airplanes.live: {len(results_live)} | adsb.fi: {len(results_fi)} | merged: {len(merged)}")
+
+    return list(merged.values())

@@ -27,6 +27,22 @@ const Table = (() => {
   let history = [];
   try { history = JSON.parse(localStorage.getItem('navytrack_history') || '[]'); } catch {}
 
+  // ── SQUAWK EMERGENCY DETECTION ──
+  const EMERGENCY_SQUAWKS = {
+    '7700': { label: 'EMERGENCY', color: '#EF4444', icon: '🆘' },
+    '7600': { label: 'RADIO FAILURE', color: '#F59E0B', icon: '📻' },
+    '7500': { label: 'HIJACK', color: '#DC2626', icon: '⚠️' },
+  };
+
+  function getSquawkInfo(squawk) {
+    if (!squawk) return null;
+    return EMERGENCY_SQUAWKS[String(squawk).trim()] || null;
+  }
+
+  function isEmergencySquawk(squawk) {
+    return !!getSquawkInfo(squawk);
+  }
+
   // ── AIRCRAFT TYPE ICON ──
   function getAircraftIcon(aircraft) {
     if (!aircraft) return '✈';
@@ -120,7 +136,6 @@ const Table = (() => {
     const a = (aircraft || '').toUpperCase();
     const c = (callsign  || '').toUpperCase();
 
-    // By aircraft type
     if (a.includes('KC-135') || a.includes('KC-10') || a.includes('STRATOTANKER') ||
         a.includes('TANKER') || a.includes('VOYAGER') || a.includes('A330 MRTT'))
       return { label: 'AERIAL REFUELING', icon: '⛽', color: '#F59E0B' };
@@ -167,7 +182,6 @@ const Table = (() => {
         a.includes('CESSNA') || a.includes('DORNIER'))
       return { label: 'LIAISON / SURVEY', icon: '✈', color: '#64748B' };
 
-    // By callsign prefix
     if (c.startsWith('RCH'))  return { label: 'TRANSPORT', icon: '📦', color: '#6366F1' };
     if (c.startsWith('NAVY')) return { label: 'NAVAL OPS', icon: '⚓', color: '#3B82F6' };
     if (c.startsWith('JAKE')) return { label: 'MARITIME PATROL', icon: '🔍', color: '#3B82F6' };
@@ -178,9 +192,8 @@ const Table = (() => {
   }
 
   function inferDestination(heading, lat, lon) {
-    if (heading == null) return 'Unknown';
+    if (heading == null) return '—';
     const h = parseFloat(heading);
-    // Based on heading and current position infer general direction
     if (lat > 35 && lon > 25 && lon < 65) {
       if (h >= 45  && h < 135) return 'Persian Gulf / Arabian Sea';
       if (h >= 135 && h < 225) return 'Red Sea / Horn of Africa';
@@ -197,7 +210,6 @@ const Table = (() => {
       if (h >= 225 && h < 315) return 'Red Sea';
       return 'Middle East';
     }
-    // North America
     if (lon < -50) {
       if (h >= 45  && h < 135) return 'Atlantic / Europe';
       if (h >= 225 && h < 315) return 'Pacific';
@@ -234,6 +246,15 @@ const Table = (() => {
     Utils.toast(flag + navy + ' New: ' + (row.callsign || row.icao) + ' — ' + (row.aircraft || 'Military'), 'info', 5000);
   }
 
+  // ── EMERGENCY SQUAWK ALERT ──
+  function notifyEmergency(row, squawkInfo) {
+    Utils.toast(
+      squawkInfo.icon + ' SQUAWK ' + row.squawk + ' — ' + squawkInfo.label +
+      ': ' + (row.callsign || row.icao),
+      'error', 10000
+    );
+  }
+
   const originData = new Map();
   try {
     const saved = JSON.parse(localStorage.getItem('navytrack_origins') || '{}');
@@ -262,6 +283,9 @@ const Table = (() => {
     });
   }
 
+  // Track already-alerted emergency squawks to avoid spam
+  const alertedEmergencies = new Set();
+
   function render(data) {
     data = data || [];
     const tbody = document.getElementById('tableBody');
@@ -289,6 +313,18 @@ const Table = (() => {
       const flag        = getFlag(row.icao, row.registration || '');
       const navyBadge   = navy ? '<span class="navy-badge">US NAVY</span>' : '';
 
+      // ── EMERGENCY SQUAWK CHECK ──
+      const squawkInfo = getSquawkInfo(row.squawk);
+      if (squawkInfo) {
+        const alertKey = row.icao + '_' + row.squawk;
+        if (!alertedEmergencies.has(alertKey)) {
+          alertedEmergencies.add(alertKey);
+          notifyEmergency(row, squawkInfo);
+        }
+        // Red pulsing row for emergency
+        tr.style.cssText = 'background:rgba(239,68,68,0.12);animation:emergencyPulse 2s ease-in-out infinite;';
+      }
+
       if (!knownICAOs.has(row.icao) && knownICAOs.size > 0) {
         if (newCount < 3) { notifyNew(row); newCount++; }
         saveToHistory(row);
@@ -303,7 +339,7 @@ const Table = (() => {
         const trail = trailData.get(row.icao) || [];
         const last = trail[trail.length - 1];
         if (!last || Math.abs(last.lat - row.lat) > 0.01 || Math.abs(last.lon - row.lon) > 0.01) {
-          trail.push({ lat: row.lat, lon: row.lon, ts: Date.now() });
+          trail.push({ lat: row.lat, lon: row.lon, ts: Date.now(), heading: row.heading });
           if (trail.length > 50) trail.shift();
           trailData.set(row.icao, trail);
           saveTrails();
@@ -319,6 +355,11 @@ const Table = (() => {
         ? '<span class="heading-arrow"><span class="heading-dial"><svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform:rotate(' + heading + 'deg)"><path d="M10 2L13 14H10V18H10L7 14H10V2Z" fill="#0057FF" opacity="0.9"/><circle cx="10" cy="10" r="9" stroke="#E2E5EA" stroke-width="1" fill="none"/></svg></span><span class="cell-mono">' + heading + '°</span></span>'
         : '—';
 
+      // Squawk cell — highlight emergencies
+      const squawkCell = squawkInfo
+        ? '<span style="color:' + squawkInfo.color + ';font-weight:700;font-family:var(--font-mono)">' + squawkInfo.icon + ' ' + row.squawk + '</span>'
+        : escHtml(row.squawk || '—');
+
       tr.innerHTML =
         '<td><span class="type-badge ' + row.type + '">' + (row.type === 'carrier' ? '⚓ Carrier' : '✈ Flight') + '</span></td>' +
         '<td class="cell-callsign">' + flag + ' ' + escHtml(row.callsign || '—') + navyBadge + '</td>' +
@@ -327,7 +368,7 @@ const Table = (() => {
         '<br><span style="font-family:var(--font-mono);font-size:0.6rem;color:' + mission.color + ';letter-spacing:0.06em">' + mission.icon + ' ' + mission.label + '</span>' +
         '</td>' +
         '<td class="cell-muted" style="font-size:0.72rem">' + escHtml(originCache) + '</td>' +
-        '<td class="cell-muted">' + escHtml(row.destination || '—') + '</td>' +
+        '<td class="cell-muted">' + escHtml(row.destination || inferDestination(row.heading, row.lat, row.lon)) + '</td>' +
         '<td class="cell-mono">' + (isCarrier ? '—' : Utils.formatAlt(row.altitude)) + '</td>' +
         '<td class="cell-mono">' + Utils.formatSpeed(row.speed) + '</td>' +
         '<td>' + headingCell + '</td>' +
@@ -386,15 +427,26 @@ const Table = (() => {
     const isCarrier = row.type === 'carrier';
     const navy      = isUSNavy(row);
     const flag      = getFlag(row.icao, row.registration || '');
+    const mission   = classifyMission(row.aircraft, row.callsign, row.heading);
+    const squawkInfo = getSquawkInfo(row.squawk);
 
     title.textContent = flag + ' ' + (row.callsign || row.icao || '—');
 
+    // Squawk section — emergency banner if needed
+    const squawkBanner = squawkInfo
+      ? '<div style="background:' + squawkInfo.color + '22;border:1px solid ' + squawkInfo.color + ';border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">' +
+        '<span style="font-size:1.4rem">' + squawkInfo.icon + '</span>' +
+        '<div><div style="color:' + squawkInfo.color + ';font-weight:700;font-size:0.85rem">SQUAWK ' + row.squawk + ' — ' + squawkInfo.label + '</div>' +
+        '<div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px">Emergency transponder code detected</div></div></div>'
+      : '';
+
     body.innerHTML =
+      squawkBanner +
       '<div class="detail-photo-wrap" id="photoWrap"><div class="detail-photo-loading">Loading photo…</div></div>' +
       (navy ? '<div class="detail-navy-banner">🇺🇸 US Navy Aircraft</div>' : '') +
       '<div class="detail-section"><div class="detail-section-title">Identification</div>' +
       detailRow('Type', isCarrier ? '⚓ Carrier' : '✈ Military Flight') +
-      '<div class="detail-row"><span class="detail-key">MISSION</span><span class="detail-val" style="color:' + classifyMission(row.aircraft, row.callsign, row.heading).color + ';font-weight:700">' + classifyMission(row.aircraft, row.callsign, row.heading).icon + ' ' + classifyMission(row.aircraft, row.callsign, row.heading).label + '</span></div>' +
+      '<div class="detail-row"><span class="detail-key">MISSION</span><span class="detail-val" style="color:' + mission.color + ';font-weight:700">' + mission.icon + ' ' + mission.label + '</span></div>' +
       detailRow('Callsign', row.callsign) +
       detailRow(isCarrier ? 'MMSI' : 'ICAO Hex', row.icao) +
       detailRow(isCarrier ? 'Hull Number' : 'Registration', row.registration || '—') +
@@ -408,11 +460,16 @@ const Table = (() => {
       detailRow('Speed', Utils.formatSpeed(row.speed)) +
       detailRow('Heading', Utils.formatHeading(row.heading)) +
       detailRow('Status', isCarrier ? 'At Sea' : (row.on_ground ? 'On Ground' : 'Airborne')) +
-      detailRow('Squawk', row.squawk || '—') +
+      '<div class="detail-row"><span class="detail-key">Squawk</span><span class="detail-val">' +
+      (squawkInfo
+        ? '<span style="color:' + squawkInfo.color + ';font-weight:700">' + squawkInfo.icon + ' ' + row.squawk + ' — ' + squawkInfo.label + '</span>'
+        : escHtml(row.squawk || '—')) +
+      '</span></div>' +
       '</div>' +
       '<div class="detail-section"><div class="detail-section-title">Route</div>' +
       detailRow('Origin', row.origin || 'Detecting...', true, 'origin') +
-      detailRow('Destination', (row.destination && row.destination !== 'Middle East') ? row.destination : inferDestination(row.heading, row.lat, row.lon), true) +
+      detailRow('Destination', (row.destination && row.destination !== '—') ? row.destination : inferDestination(row.heading, row.lat, row.lon), true) +
+      detailRow('Time in Zone', timeInZone(row.icao), true) +
       detailRow('Last Update', row.last_seen ? new Date(row.last_seen).toUTCString() : '—', true) +
       '</div>' +
       (row.lat && row.lon ?
@@ -421,18 +478,18 @@ const Table = (() => {
         '<div id="trailMap" style="width:100%;height:100%"></div>' +
         '</div>' +
         '<a class="btn-secondary" style="margin-top:8px;justify-content:center;display:flex" href="https://www.openstreetmap.org/?mlat=' + row.lat + '&mlon=' + row.lon + '&zoom=7" target="_blank" rel="noopener">Open full map ↗</a>' +
+        '<a class="btn-secondary" style="margin-top:6px;justify-content:center;display:flex" href="https://globe.adsbexchange.com/?icao=' + row.icao.toLowerCase() + '" target="_blank" rel="noopener">Track on ADS-B Exchange ↗</a>' +
         '</div>' : '');
 
     panel.classList.add('open');
     overlay.classList.add('visible');
 
-    // Initialize trail map with Leaflet
+    // Initialize trail map with Leaflet + direction arrows
     if (row.lat && row.lon) {
       setTimeout(function() {
         const mapEl = document.getElementById('trailMap');
         if (!mapEl) return;
 
-        // Remove existing map if any
         if (window._navyMap) {
           window._navyMap.remove();
           window._navyMap = null;
@@ -449,10 +506,12 @@ const Table = (() => {
           maxZoom: 19
         }).addTo(map);
 
-        // Draw trail
+        // Draw trail with direction arrows
         const trail = trailData.get(row.icao) || [];
         if (trail.length > 1) {
           const latlngs = trail.map(p => [p.lat, p.lon]);
+
+          // Main trail line
           L.polyline(latlngs, {
             color: '#00D478',
             weight: 2,
@@ -460,24 +519,43 @@ const Table = (() => {
             dashArray: '4 4'
           }).addTo(map);
 
-          // Trail dots
+          // Direction arrows on trail segments
           trail.forEach(function(p, i) {
             if (i < trail.length - 1) {
+              const next = trail[i + 1];
+              // Trail dot
               L.circleMarker([p.lat, p.lon], {
                 radius: 2,
                 fillColor: '#00D478',
                 fillOpacity: 0.5,
                 color: 'transparent'
               }).addTo(map);
+
+              // Arrow every 3 points
+              if (i % 3 === 0 && i > 0) {
+                const midLat = (p.lat + next.lat) / 2;
+                const midLon = (p.lon + next.lon) / 2;
+                const dLat = next.lat - p.lat;
+                const dLon = next.lon - p.lon;
+                const angle = Math.atan2(dLon, dLat) * 180 / Math.PI;
+                const arrowIcon = L.divIcon({
+                  html: '<div style="width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:8px solid #00D478;transform:rotate(' + angle + 'deg);opacity:0.8"></div>',
+                  iconSize: [8, 8],
+                  iconAnchor: [4, 4],
+                  className: ''
+                });
+                L.marker([midLat, midLon], { icon: arrowIcon }).addTo(map);
+              }
             }
           });
         }
 
-        // Current position marker
+        // Current position marker with heading
+        const headingDeg = row.heading || 0;
         const icon = L.divIcon({
-          html: '<div style="width:12px;height:12px;background:#00D478;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px #00D478"></div>',
-          iconSize: [12, 12],
-          iconAnchor: [6, 6],
+          html: '<div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:16px solid #00D478;transform:rotate(' + headingDeg + 'deg);filter:drop-shadow(0 0 4px #00D478)"></div>',
+          iconSize: [12, 16],
+          iconAnchor: [6, 8],
           className: ''
         });
         L.marker([row.lat, row.lon], { icon: icon }).addTo(map);
@@ -531,6 +609,13 @@ const Table = (() => {
   }
 
   function init() {
+    // Inject emergency pulse animation
+    if (!document.getElementById('emergencyStyle')) {
+      const style = document.createElement('style');
+      style.id = 'emergencyStyle';
+      style.textContent = '@keyframes emergencyPulse { 0%,100%{background:rgba(239,68,68,0.12)} 50%{background:rgba(239,68,68,0.25)} }';
+      document.head.appendChild(style);
+    }
     bindSort();
     document.getElementById('closeDetail') && document.getElementById('closeDetail').addEventListener('click', closeDetail);
     document.getElementById('detailOverlay') && document.getElementById('detailOverlay').addEventListener('click', closeDetail);
