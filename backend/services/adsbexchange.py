@@ -79,7 +79,7 @@ def _parse_aircraft(ac: dict) -> FlightData:
         aircraft     = ac.get("desc") or ac.get("t") or None,
         registration = ac.get("r") or None,
         origin       = None,
-        destination  = "Middle East",
+        destination  = None,
         lat          = float(ac.get("lat")) if ac.get("lat") is not None else None,
         lon          = float(ac.get("lon")) if ac.get("lon") is not None else None,
         altitude     = altitude,

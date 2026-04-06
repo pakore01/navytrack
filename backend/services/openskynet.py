@@ -58,7 +58,7 @@ def _parse_state(s: list) -> FlightData | None:
         aircraft     = None,   # OpenSky free tier has no aircraft type
         registration = None,
         origin       = s[2] or None,   # origin country
-        destination  = "Middle East region",
+        destination  = None,
         lat          = float(lat),
         lon          = float(lon),
         altitude     = _m_to_ft(s[7]),
