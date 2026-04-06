@@ -57,7 +57,6 @@ const App = (() => {
     overlay.addEventListener('click', closeMenu);
 
     // Conectar items del dropdown con los botones reales
-    // Los módulos ya están inicializados en este punto, .click() funciona
     const map = {
       'dd-zones':   'zonesBtn',
       'dd-stats':   'statsBtn',
@@ -128,16 +127,17 @@ const App = (() => {
   async function init() {
     console.log(`[App] ${CONFIG.APP_NAME} v${CONFIG.VERSION} starting…`);
 
+    // Initialize feature modules
+    if (typeof Theme !== 'undefined')        Theme.init();
+    if (typeof Zones !== 'undefined')        Zones.init();
+    if (typeof Stats !== 'undefined')        Stats.init();
+    if (typeof History !== 'undefined')      History.init();
+    if (typeof AlertsHistory !== 'undefined') AlertsHistory.init();
+
     // Initialize core modules
     ApiKey.init();
     Table.init();
     Filters.init();
-
-    // Initialize feature modules
-    if (typeof Zones !== 'undefined')         Zones.init();
-    if (typeof Stats !== 'undefined')         Stats.init();
-    if (typeof History !== 'undefined')       History.init();
-    if (typeof AlertsHistory !== 'undefined') AlertsHistory.init();
 
     // Bind global events and mobile menu
     bindEvents();
@@ -172,3 +172,4 @@ window.App = App;
 
 // ── BOOT ON DOM READY ──
 document.addEventListener('DOMContentLoaded', () => App.init());
+
