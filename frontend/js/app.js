@@ -133,6 +133,7 @@ const App = (() => {
     if (typeof Stats !== 'undefined')        Stats.init();
     if (typeof History !== 'undefined')      History.init();
     if (typeof AlertsHistory !== 'undefined') AlertsHistory.init();
+    if (typeof Regions !== 'undefined')      Regions.init();
 
     // Initialize core modules
     ApiKey.init();
