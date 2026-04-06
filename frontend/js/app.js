@@ -26,8 +26,6 @@ const App = (() => {
   // ── MANUAL REFRESH ──
   async function refresh() {
     await Api.fetchAll();
-
-    // Restart interval after manual refresh
     const sel = document.getElementById('refreshInterval');
     const val = parseInt(sel?.value || '0');
     startRefresh(val);
@@ -58,22 +56,41 @@ const App = (() => {
 
     overlay.addEventListener('click', closeMenu);
 
-    // Conectar items del dropdown con los botones reales
-    const map = {
-      'dd-zones':   'zonesBtn',
-      'dd-stats':   'statsBtn',
-      'dd-alerts':  'alertsHistoryBtn',
-      'dd-history': 'historyBtn',
-      'dd-theme':   'themeBtn',
-      'dd-export':  'exportBtn',
+    // Abrir modales directamente — no depende de listeners externos
+    const actions = {
+      'dd-zones': () => {
+        document.getElementById('zonesModal')?.classList.add('visible');
+      },
+      'dd-stats': () => {
+        document.getElementById('statsModal')?.classList.add('visible');
+        // Disparar render de stats si existe la función
+        if (typeof renderStats === 'function') renderStats();
+      },
+      'dd-alerts': () => {
+        document.getElementById('alertsHistoryModal')?.classList.add('visible');
+        // Recargar historial si existe la función
+        if (typeof loadAlertsHistory === 'function') loadAlertsHistory();
+      },
+      'dd-history': () => {
+        document.getElementById('historyModal')?.classList.add('visible');
+        // Render historial si existe la función
+        if (typeof renderHistory === 'function') renderHistory();
+      },
+      'dd-theme': () => {
+        // Disparar el botón de theme directamente
+        document.getElementById('themeBtn')?.click();
+      },
+      'dd-export': () => {
+        Utils.exportCSV(STATE.display, 'airforcetrack-export.csv');
+      },
     };
 
-    Object.entries(map).forEach(([ddId, btnId]) => {
-      const ddItem = document.getElementById(ddId);
-      if (ddItem) {
-        ddItem.addEventListener('click', () => {
+    Object.entries(actions).forEach(([ddId, action]) => {
+      const item = document.getElementById(ddId);
+      if (item) {
+        item.addEventListener('click', () => {
           closeMenu();
-          document.getElementById(btnId)?.click();
+          action();
         });
       }
     });
@@ -86,7 +103,7 @@ const App = (() => {
 
     // Export CSV
     document.getElementById('exportBtn')?.addEventListener('click', () => {
-      Utils.exportCSV(STATE.display, 'navytrack-export.csv');
+      Utils.exportCSV(STATE.display, 'airforcetrack-export.csv');
     });
 
     // Auto-refresh interval select
@@ -148,7 +165,6 @@ const App = (() => {
       startRefresh(interval);
     } else {
       Api.setStatus('idle', 'No API configured');
-      // Show empty state
       const empty = document.getElementById('emptyState');
       if (empty) empty.classList.add('visible');
       const scroll = document.querySelector('.table-scroll');
