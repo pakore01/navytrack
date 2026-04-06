@@ -1,0 +1,12 @@
+[
+  {
+    "icao": "4d232d",
+    "callsign": "AS2132",
+    "aircraft": "IAI Heron Drone",
+    "region": "Europe",
+    "matched": "SQUAWK 7700",
+    "lat": 35.6819,
+    "lon": 14.336987,
+    "time": "2026-04-05T09:00:41.219561+00:00"
+  }
+]
